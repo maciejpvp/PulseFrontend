@@ -1,0 +1,18 @@
+import { Navbar } from "@/components/Navbar";
+import { Sidebar } from "@/components/Sidebar";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Outlet } from "react-router";
+
+export const RootLayout = () => {
+    return (
+        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+            <div className="h-[calc(100vh-4rem)]">
+                <Navbar />
+                <div className="flex flex-row h-[calc(100vh-4rem)] pt-2">
+                    <Sidebar />
+                    <Outlet />
+                </div>
+            </div>
+        </ThemeProvider>
+    )
+}
