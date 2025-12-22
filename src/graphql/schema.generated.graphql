@@ -1,0 +1,144 @@
+type Album {
+  id: ID!
+  name: String!
+  artist: ArtistPreview!
+  songs(first: Int = 10, after: String): SongConnection!
+}
+
+type AlbumPreview {
+  id: ID!
+  name: String!
+}
+
+input AlbumQueryInput {
+  albumId: String!
+  artistId: String!
+}
+
+type AlbumEdge {
+  node: AlbumPreview!
+  cursor: String!
+}
+
+type AlbumConnection {
+  edges: [AlbumEdge!]!
+  pageInfo: PageInfo!
+}
+type Artist {
+  id: ID!
+  name: String!
+  songs(first: Int = 10, after: String): SongConnection!
+  albums(first: Int = 10, after: String): AlbumConnection!
+}
+
+type ArtistPreview {
+  id: ID!
+  name: String!
+}
+
+enum ContextType {
+  ALBUM
+  PLAYLIST
+  ARTIST
+  SONG
+}
+
+union RecentPlayedItem = AlbumPreview | SongPreview | ArtistPreview | PlaylistPreview
+
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+}
+enum PlaylistVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+type Playlist {
+  id: ID!
+  name: String!
+  creator: User!
+  createdAt: String!
+  visibility: PlaylistVisibility!
+  songs(first: Int = 10, after: String): SongConnection!
+}
+
+type PlaylistPreview {
+  id: ID!
+  name: String!
+}
+
+type UploadUrlResponse {
+  uploadUrl: String!
+}
+
+type AddToPlaylistResult {
+  playlistId: ID!
+  songId: ID!
+}
+
+type RemoveFromPlaylistResult {
+  playlistId: ID!
+  songId: ID!
+  removed: Boolean!
+}
+
+type Query {
+  artist(artistId: ID!): Artist!
+  album(input: AlbumQueryInput!): Album!
+  playlist(playlistId: ID!): Playlist!
+  recentPlayed: [RecentPlayedItem!]!
+}
+
+type Mutation {
+  """
+  Get S3 upload URL to upload mp3 file into bucket
+  """
+  songPlay(input: SongPlayInput!): String!
+  songUpload(input: SongUploadInput!): UploadUrlResponse!
+  artistCreate(name: String!): Artist!
+  albumCreate(name: String!, artistId: ID!): Album!
+  playlistCreate(name: String!): Playlist!
+  playlistAddToPlaylist(playlistId: ID!, songId: ID!, songArtistId: ID!): AddToPlaylistResult!
+  playlistRemoveFromPlaylist(playlistId: ID!, songId: ID!): RemoveFromPlaylistResult!
+}
+
+type Song {
+  id: ID!
+  title: String!
+  artist: ArtistPreview!
+  duration: Int
+}
+
+type SongPreview {
+  id: ID!
+  title: String!
+}
+
+input SongPlayInput {
+  artistId: String!
+  songId: String!
+  contextType: ContextType!
+  contextId: String!
+}
+
+input SongUploadInput {
+  songTitle: String!
+  artistId: ID!
+  duration: Int!
+  albumId: ID
+}
+
+type SongEdge {
+  node: Song!
+  cursor: String!
+}
+
+type SongConnection {
+  edges: [SongEdge!]!
+  pageInfo: PageInfo!
+}
+type User {
+  id: ID!
+}
