@@ -1,7 +1,8 @@
+import { Outlet } from "react-router";
+
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Outlet } from "react-router";
 
 export const RootLayout = () => {
     return (

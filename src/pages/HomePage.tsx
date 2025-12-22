@@ -3,5 +3,5 @@ export const HomePage = () => {
     <div>
       <p>Home</p>
     </div>
-  )
+  );
 };
