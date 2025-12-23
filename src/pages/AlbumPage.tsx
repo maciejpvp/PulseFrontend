@@ -2,13 +2,14 @@ import { useParams } from "react-router";
 import { useAlbum } from "../graphql/queries/useAlbum";
 import { Disc, Clock, User } from "lucide-react";
 import { formatTime } from "@/lib/formatTime";
+import { ErrorPage } from "./Error";
 
 export const AlbumPage = () => {
     const { albumId, artistId } = useParams<{ albumId: string; artistId: string }>();
     const { album, isLoading, isError } = useAlbum(albumId ?? "", artistId ?? "");
 
     if (isLoading) return <div className="p-8 text-stone-400">Loading...</div>;
-    if (isError || !album) return <div className="p-8 text-red-400">Album not found</div>;
+    if (isError || !album) return <ErrorPage />;
 
     const songs = album.songs.edges.map((edge) => edge.node);
 

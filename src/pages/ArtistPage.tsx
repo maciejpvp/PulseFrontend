@@ -3,13 +3,15 @@ import { useArtist } from "../graphql/queries/useArtist";
 import { ArtistPic } from "@/components/Artist/ArtistPic";
 import { SongItem } from "@/components/SongItem";
 import { AlbumItem } from "@/components/AlbumItem";
+import { ErrorPage } from "./Error";
 
 export const ArtistPage = () => {
     const { artistId } = useParams<{ artistId: string }>();
     const { artist, isLoading, isError } = useArtist(artistId ?? "");
 
+    console.log(isError, artist)
     if (isLoading) return <div>Loading...</div>;
-    if (isError || !artist) return <div>Artist not found</div>;
+    if (isError || !artist) return <ErrorPage />;
 
     const albums = artist.albums.edges.map((edge) => edge.node);
     const songs = artist.songs.edges.map((edge) => edge.node);
@@ -23,7 +25,6 @@ export const ArtistPage = () => {
             </div>
         </div>
 
-        {/* Popular */}
         <div className="mt-4 w-full">
             <h2 className="text-2xl font-bold">Popular</h2>
             <ul>
@@ -33,7 +34,6 @@ export const ArtistPage = () => {
             </ul>
         </div>
 
-        {/* Albums */}
         <div className="mt-4 w-full">
             <h2 className="text-2xl font-bold">Albums</h2>
             <ul>
