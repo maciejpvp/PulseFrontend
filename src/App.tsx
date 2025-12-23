@@ -7,6 +7,7 @@ import { AuthLayout } from "./layouts/AuthLayout";
 import { HomePage } from "./pages/HomePage";
 import { LibraryPage } from "./pages/LibraryPage";
 import { ArtistPage } from "./pages/ArtistPage";
+import { AlbumPage } from "./pages/AlbumPage";
 import Login from "./pages/Login";
 
 import { useAuthStore } from "./store/auth.store";
@@ -20,6 +21,7 @@ const publicRoutes = [
         children: [
             { index: true, element: <HomePage /> },
             { path: "artist/:artistId", element: <ArtistPage /> },
+            { path: "album/:artistId/:albumId", element: <AlbumPage /> },
         ],
     },
 ];

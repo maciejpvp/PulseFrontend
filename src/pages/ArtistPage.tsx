@@ -39,7 +39,7 @@ export const ArtistPage = () => {
             <ul>
                 {albums.map((album) => (
                     <li key={album.id}>
-                        <AlbumItem album={album} />
+                        <AlbumItem album={album} artistId={artist.id} />
                     </li>
                 ))}
             </ul>
