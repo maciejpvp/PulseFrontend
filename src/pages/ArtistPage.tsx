@@ -2,7 +2,7 @@ import { useParams } from "react-router";
 import { useArtist } from "../graphql/queries/useArtist";
 import { ArtistPic } from "@/components/Artist/ArtistPic";
 import { SongItem } from "@/components/SongItem";
-import { AlbumItem } from "@/components/AlbumItem";
+import { CollectionView } from "@/components/CollectionView";
 import { ErrorPage } from "./Error";
 
 export const ArtistPage = () => {
@@ -39,7 +39,7 @@ export const ArtistPage = () => {
             <ul>
                 {albums.map((album) => (
                     <li key={album.id}>
-                        <AlbumItem album={album} artistId={artist.id} />
+                        <CollectionView album={album} artistId={artist.id} />
                     </li>
                 ))}
             </ul>

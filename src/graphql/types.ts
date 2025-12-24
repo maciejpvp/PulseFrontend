@@ -48,6 +48,7 @@ export type AlbumEdge = {
 
 export type AlbumPreview = {
   __typename?: 'AlbumPreview';
+  artist: ArtistPreview;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
 };
@@ -233,6 +234,7 @@ export type SongPlayInput = {
 
 export type SongPreview = {
   __typename?: 'SongPreview';
+  artistId: Scalars['ID']['output'];
   id: Scalars['ID']['output'];
   title: Scalars['String']['output'];
 };
@@ -253,3 +255,27 @@ export type User = {
   __typename?: 'User';
   id: Scalars['ID']['output'];
 };
+
+export type GetAlbumQueryVariables = Exact<{
+  input: AlbumQueryInput;
+}>;
+
+
+export type GetAlbumQuery = { __typename?: 'Query', album: { __typename?: 'Album', id: string, name: string, artist: { __typename?: 'ArtistPreview', id: string, name: string }, songs: { __typename?: 'SongConnection', edges: Array<{ __typename?: 'SongEdge', node: { __typename?: 'Song', id: string, title: string, duration?: number | null } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean } } } };
+
+export type GetArtistQueryVariables = Exact<{
+  artistId: Scalars['ID']['input'];
+}>;
+
+
+export type GetArtistQuery = { __typename?: 'Query', artist: { __typename?: 'Artist', id: string, name: string, albums: { __typename?: 'AlbumConnection', edges: Array<{ __typename?: 'AlbumEdge', node: { __typename?: 'AlbumPreview', id: string, name: string } }> }, songs: { __typename?: 'SongConnection', edges: Array<{ __typename?: 'SongEdge', node: { __typename?: 'Song', id: string, title: string, duration?: number | null, artist: { __typename?: 'ArtistPreview', id: string, name: string } } }> } } };
+
+export type GetRecentlyPlayedQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetRecentlyPlayedQuery = { __typename?: 'Query', recentPlayed: Array<
+    | { __typename: 'AlbumPreview', id: string, name: string, artist: { __typename?: 'ArtistPreview', id: string } }
+    | { __typename: 'ArtistPreview', id: string, name: string }
+    | { __typename: 'PlaylistPreview', id: string, name: string }
+    | { __typename: 'SongPreview', id: string, artistId: string, title: string }
+  > };
