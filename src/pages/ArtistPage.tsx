@@ -4,17 +4,37 @@ import { ArtistPic } from "@/components/Artist/ArtistPic";
 import { SongItem } from "@/components/SongItem";
 import { CollectionView } from "@/components/CollectionView";
 import { ErrorPage } from "./Error";
+import { usePlayerStore } from "@/store/player.store";
+import { useSongPlay } from "@/graphql/mutations/useSongPlay";
+import type { Song } from "../graphql/types";
 
 export const ArtistPage = () => {
     const { artistId } = useParams<{ artistId: string }>();
     const { artist, isLoading, isError } = useArtist(artistId ?? "");
+    const { playSong } = usePlayerStore();
+    const { playSongMutation } = useSongPlay();
 
-    console.log(isError, artist)
     if (isLoading) return <div>Loading...</div>;
     if (isError || !artist) return <ErrorPage />;
 
     const albums = artist.albums.edges.map((edge) => edge.node);
     const songs = artist.songs.edges.map((edge) => edge.node);
+
+    const handlePlaySong = async (song: Song) => {
+        try {
+            const url = await playSongMutation({
+                input: {
+                    songId: song.id,
+                    artistId: artist.id,
+                    contextId: artist.id,
+                    contextType: "ARTIST"
+                }
+            });
+            playSong(song, url, artist.id, "ARTIST", songs);
+        } catch (error) {
+            console.error("Failed to play song:", error);
+        }
+    };
 
     return <div className="w-full">
         <div className="flex items-start gap-4">
@@ -29,7 +49,11 @@ export const ArtistPage = () => {
             <h2 className="text-2xl font-bold">Popular</h2>
             <ul>
                 {songs.map((song) => (
-                    <SongItem key={song.id} song={song} />
+                    <SongItem
+                        key={song.id}
+                        song={song}
+                        onClick={() => handlePlaySong(song)}
+                    />
                 ))}
             </ul>
         </div>
@@ -39,7 +63,7 @@ export const ArtistPage = () => {
             <ul>
                 {albums.map((album) => (
                     <li key={album.id}>
-                        <CollectionView album={album} artistId={artist.id} />
+                        <CollectionView type="album" album={album} artistId={artist.id} />
                     </li>
                 ))}
             </ul>

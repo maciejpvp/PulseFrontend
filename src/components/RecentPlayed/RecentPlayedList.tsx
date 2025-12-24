@@ -12,7 +12,7 @@ export const RecentPlayedList = ({ recentItems }: Props) => {
         <div>
             <h2 className="text-2xl font-bold mt-4">Recently Played</h2>
 
-            <div className="grid grid-cols-4 gap-4">
+            <div className="flex flex-wrap gap-5">
                 {recentItems.map(item => {
                     if (item.__typename === "SongPreview") {
                         return (

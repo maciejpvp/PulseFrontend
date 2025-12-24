@@ -1,22 +1,38 @@
-import { useNavigate, useParams } from "react-router";
-import { useAlbum } from "../graphql/queries/useAlbum";
-import { Disc, Clock, User } from "lucide-react";
-import { formatTime } from "@/lib/formatTime";
+import { useParams } from "react-router";
+import { usePlaylist } from "../graphql/queries/usePlaylist";
+import { Disc, Clock } from "lucide-react";
 import { ErrorPage } from "./Error";
+import { SongItem } from "@/components/SongItem";
+import { usePlayerStore } from "@/store/player.store";
+import { useSongPlay } from "@/graphql/mutations/useSongPlay";
+import type { Song } from "../graphql/types";
 
-export const AlbumPage = () => {
-    const navigate = useNavigate();
-    const { albumId, artistId } = useParams<{ albumId: string; artistId: string }>();
-    const { album, isLoading, isError } = useAlbum(albumId ?? "", artistId ?? "");
+export const PlaylistPage = () => {
+    const { playlistId } = useParams<{ playlistId: string }>();
+    const { playlist, isLoading, isError } = usePlaylist(playlistId ?? "");
+    const { playSong } = usePlayerStore();
+    const { playSongMutation } = useSongPlay();
 
     if (isLoading) return <div className="p-8 text-stone-400">Loading...</div>;
-    if (isError || !album) return <ErrorPage />;
+    if (isError || !playlist) return <ErrorPage />;
 
-    const songs = album.songs.edges.map((edge) => edge.node);
+    const songs = playlist.songs.edges.map((edge) => edge.node);
 
-    const handleNavigateToArtist = () => {
-        navigate(`/artist/${artistId}`);
-    }
+    const handlePlaySong = async (song: Song) => {
+        try {
+            const url = await playSongMutation({
+                input: {
+                    songId: song.id,
+                    artistId: song.artist.id,
+                    contextId: playlist.id,
+                    contextType: "PLAYLIST"
+                }
+            });
+            playSong(song, url, playlist.id, "PLAYLIST", songs);
+        } catch (error) {
+            console.error("Failed to play song:", error);
+        }
+    };
 
     return (
         <div className="w-full h-full overflow-y-auto bg-stone-950 text-stone-200">
@@ -26,14 +42,9 @@ export const AlbumPage = () => {
                 </div>
 
                 <div className="flex flex-col gap-2 pb-2">
-                    <span className="text-sm font-medium uppercase tracking-wider text-stone-400">Album</span>
-                    <h1 className="text-6xl font-black text-white tracking-tight">{album.name}</h1>
+                    <span className="text-sm font-medium uppercase tracking-wider text-stone-400">Playlist</span>
+                    <h1 className="text-6xl font-black text-white tracking-tight">{playlist.name}</h1>
                     <div className="flex items-center gap-2 text-stone-300 font-medium mt-4">
-                        <div className="w-6 h-6 bg-stone-700 rounded-full flex items-center justify-center">
-                            <User size={16} />
-                        </div>
-                        <span className="hover:underline cursor-pointer" onClick={handleNavigateToArtist}>{album.artist.name}</span>
-                        <span className="text-stone-500">•</span>
                         <span className="text-stone-400">{songs.length} songs</span>
                     </div>
                 </div>
@@ -48,22 +59,14 @@ export const AlbumPage = () => {
 
                 <div className="flex flex-col">
                     {songs.map((song, index) => (
-                        <div
-                            key={song.id}
-                            className="grid grid-cols-[16px_1fr_auto] gap-4 px-4 py-3 hover:bg-white/5 rounded-md group transition-colors items-center"
-                        >
-                            <span className="text-stone-500 group-hover:text-stone-300 text-sm font-medium tabular-nums">
+                        <div key={song.id} className="flex items-center gap-4 group">
+                            <span className="text-stone-500 group-hover:text-stone-300 text-sm font-medium tabular-nums w-4 text-center">
                                 {index + 1}
                             </span>
-                            <div className="flex flex-col">
-                                <span className="text-white font-medium text-base">{song.title}</span>
-                                <span className="text-stone-500 text-sm group-hover:text-stone-400">
-                                    {album.artist.name}
-                                </span>
-                            </div>
-                            <span className="text-stone-500 text-sm font-medium tabular-nums">
-                                {song.duration ? formatTime(song.duration) : "--:--"}
-                            </span>
+                            <SongItem
+                                song={song}
+                                onClick={() => handlePlaySong(song)}
+                            />
                         </div>
                     ))}
                 </div>
