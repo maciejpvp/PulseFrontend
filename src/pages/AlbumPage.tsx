@@ -1,13 +1,18 @@
 import { useNavigate, useParams } from "react-router";
 import { useAlbum } from "../graphql/queries/useAlbum";
-import { Disc, Clock, User } from "lucide-react";
+import { Disc, Clock, User, Play } from "lucide-react";
 import { formatTime } from "@/lib/formatTime";
 import { ErrorPage } from "./Error";
+import { usePlayerStore } from "@/store/player.store";
+import { useSongPlay } from "@/graphql/mutations/useSongPlay";
+import type { Song } from "../graphql/types";
 
 export const AlbumPage = () => {
     const navigate = useNavigate();
     const { albumId, artistId } = useParams<{ albumId: string; artistId: string }>();
     const { album, isLoading, isError } = useAlbum(albumId ?? "", artistId ?? "");
+    const { playSong } = usePlayerStore();
+    const { playSongMutation } = useSongPlay();
 
     if (isLoading) return <div className="p-8 text-stone-400">Loading...</div>;
     if (isError || !album) return <ErrorPage />;
@@ -17,6 +22,23 @@ export const AlbumPage = () => {
     const handleNavigateToArtist = () => {
         navigate(`/artist/${artistId}`);
     }
+
+    const handlePlaySong = async (song: Song) => {
+        console.log(song);
+        try {
+            const url = await playSongMutation({
+                input: {
+                    songId: song.id,
+                    artistId: album.artist.id,
+                    contextId: album.id,
+                    contextType: "ALBUM"
+                }
+            });
+            playSong(song, url, album.id, "ALBUM", songs);
+        } catch (error) {
+            console.error("Failed to play song:", error);
+        }
+    };
 
     return (
         <div className="w-full h-full overflow-y-auto bg-stone-950 text-stone-200">
@@ -50,14 +72,18 @@ export const AlbumPage = () => {
                     {songs.map((song, index) => (
                         <div
                             key={song.id}
-                            className="grid grid-cols-[16px_1fr_auto] gap-4 px-4 py-3 hover:bg-white/5 rounded-md group transition-colors items-center"
+                            onClick={() => handlePlaySong(song)}
+                            className="grid grid-cols-[16px_1fr_auto] gap-4 px-4 py-3 hover:bg-white/5 rounded-md group transition-colors items-center cursor-pointer"
                         >
-                            <span className="text-stone-500 group-hover:text-stone-300 text-sm font-medium tabular-nums">
-                                {index + 1}
-                            </span>
+                            <div className="flex items-center justify-center">
+                                <span className="text-stone-500 group-hover:hidden text-sm font-medium tabular-nums">
+                                    {index + 1}
+                                </span>
+                                <Play className="w-4 h-4 text-white hidden group-hover:block" />
+                            </div>
                             <div className="flex flex-col">
-                                <span className="text-white font-medium text-base">{song.title}</span>
-                                <span className="text-stone-500 text-sm group-hover:text-stone-400">
+                                <span className="text-white font-medium text-base group-hover:text-white transition-colors">{song.title}</span>
+                                <span className="text-stone-500 text-sm group-hover:text-stone-400 transition-colors">
                                     {album.artist.name}
                                 </span>
                             </div>

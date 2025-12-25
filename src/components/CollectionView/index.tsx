@@ -1,6 +1,9 @@
-import type { AlbumPreview, ArtistPreview, PlaylistPreview, SongPreview } from "@/graphql/types";
+import { useSongPlay } from "@/graphql/mutations/useSongPlay";
+import { getFullSongItem } from "@/graphql/queries/useGetFullSongItem";
+import type { AlbumPreview, ArtistPreview, MutationSongPlayArgs, PlaylistPreview, SongPreview } from "@/graphql/types";
+import { usePlayerStore } from "@/store/player.store";
 import { Disc, User } from "lucide-react";
-import { Link } from "react-router";
+import { useNavigate } from "react-router";
 
 type Props = {
     type: "album";
@@ -20,6 +23,10 @@ type Props = {
 
 export const CollectionView = (props: Props) => {
     const { type } = props;
+    const navigate = useNavigate();
+
+    const { playSongMutation } = useSongPlay();
+    const { playSong } = usePlayerStore();
 
     let name = "";
     let artistId = "";
@@ -44,20 +51,48 @@ export const CollectionView = (props: Props) => {
     } else if (type === "song") {
         name = props.song.title;
         itemId = props.song.id;
+        artistId = props.artistId;
         link = null;
+    }
+
+    const handleClick = async () => {
+        if (link) {
+            navigate(link);
+        }
+        if (type === "song") {
+            const input: MutationSongPlayArgs = {
+                input: {
+                    songId: itemId,
+                    artistId: artistId,
+                    contextId: artistId,
+                    contextType: "ARTIST"
+                }
+            };
+            console.log(input);
+
+            const fullSong = await getFullSongItem(itemId, artistId);
+
+            if (!fullSong) {
+                console.error("Song not found");
+                return;
+            }
+
+            console.log(fullSong);
+
+            const url = await playSongMutation(input);
+            playSong(fullSong, url, artistId, "ARTIST", [])
+        }
     }
 
 
     return (
-        <Link to={link ?? "#"}>
-            <div className="group cursor-pointer w-40">
-                <div className="w-40 h-40 bg-stone-800 rounded-md flex items-center justify-center mb-3 group-hover:bg-stone-700 transition-colors">
-                    <Icon className="w-20 h-20 text-stone-600 group-hover:text-stone-500 transition-colors" />
-                </div>
-                <div className="font-medium text-stone-200 truncate group-hover:text-white transition-colors">
-                    {name}
-                </div>
+        <div className="group cursor-pointer w-40" onClick={handleClick}>
+            <div className="w-40 h-40 bg-stone-800 rounded-md flex items-center justify-center mb-3 group-hover:bg-stone-700 transition-colors">
+                <Icon className="w-20 h-20 text-stone-600 group-hover:text-stone-500 transition-colors" />
             </div>
-        </Link>
+            <div className="font-medium text-stone-200 truncate group-hover:text-white transition-colors">
+                {name}
+            </div>
+        </div>
     );
 };
