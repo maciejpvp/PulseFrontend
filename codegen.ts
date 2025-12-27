@@ -3,7 +3,8 @@ import type { CodegenConfig } from '@graphql-codegen/cli';
 
 const config: CodegenConfig = {
     overwrite: true,
-    schema: "src/graphql/schema.generated.graphql",
+    // schema: "src/graphql/schema.generated.graphql",
+    schema: "../../pulse-infra/graphql/schema.generated.graphql",
     documents: "src/**/*.{ts,tsx}",
     ignoreNoDocuments: true,
     generates: {

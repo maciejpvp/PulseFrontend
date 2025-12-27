@@ -17,6 +17,8 @@ export const ArtistPage = () => {
     if (isLoading) return <div>Loading...</div>;
     if (isError || !artist) return <ErrorPage />;
 
+    console.log(artist)
+
     const albums = artist.albums.edges.map((edge) => edge.node);
     const songs = artist.songs.edges.map((edge) => edge.node);
 
@@ -38,7 +40,7 @@ export const ArtistPage = () => {
 
     return <div className="w-full">
         <div className="flex items-start gap-4">
-            <ArtistPic />
+            <ArtistPic url={artist.avatarUrl} />
             <div className="flex flex-col gap-2">
                 <h1 className="text-4xl font-bold mt-4">{artist.name}</h1>
                 <button className="bg-stone-800 text-stone-200 px-4 py-2 rounded-md hover:bg-stone-700 transition-colors">Follow</button>
