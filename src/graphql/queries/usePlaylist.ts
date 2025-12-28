@@ -8,6 +8,7 @@ query GetPlaylist($playlistId: ID!) {
   playlist(playlistId: $playlistId) {
     id
     name
+    imageUrl
     songs {
       edges {
         node {
@@ -32,41 +33,41 @@ query GetPlaylist($playlistId: ID!) {
 const client = generateClient();
 
 interface UsePlaylistResult {
-    playlist: Playlist | null;
-    isLoading: boolean;
-    isError: boolean;
+  playlist: Playlist | null;
+  isLoading: boolean;
+  isError: boolean;
 }
 
 export const usePlaylist = (playlistId: string): UsePlaylistResult => {
-    const [playlist, setPlaylist] = useState<Playlist | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [isError, setIsError] = useState<boolean>(false);
+  const [playlist, setPlaylist] = useState<Playlist | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isError, setIsError] = useState<boolean>(false);
 
-    useEffect(() => {
-        const fetchPlaylist = async () => {
-            setIsLoading(true);
-            setIsError(false);
-            try {
-                const response = await client.graphql({
-                    query: GET_PLAYLIST,
-                    variables: { playlistId },
-                });
+  useEffect(() => {
+    const fetchPlaylist = async () => {
+      setIsLoading(true);
+      setIsError(false);
+      try {
+        const response = await client.graphql({
+          query: GET_PLAYLIST,
+          variables: { playlistId },
+        });
 
-                // @ts-expect-error - Amplify types
-                const data = response.data as { playlist: Playlist };
-                setPlaylist(data.playlist);
-            } catch (error) {
-                console.error("Error fetching playlist:", error);
-                setIsError(true);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+        // @ts-expect-error - Amplify types
+        const data = response.data as { playlist: Playlist };
+        setPlaylist(data.playlist);
+      } catch (error) {
+        console.error("Error fetching playlist:", error);
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-        if (playlistId) {
-            fetchPlaylist();
-        }
-    }, [playlistId]);
+    if (playlistId) {
+      fetchPlaylist();
+    }
+  }, [playlistId]);
 
-    return { playlist, isLoading, isError };
+  return { playlist, isLoading, isError };
 };

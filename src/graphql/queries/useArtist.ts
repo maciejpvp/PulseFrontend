@@ -19,19 +19,7 @@ const GET_ARTIST = gql`
           node {
             id
             name
-          }
-        }
-      }
-      songs {
-        edges {
-          node {
-            id
-            title
-            duration
-            artist {
-              id
-              name
-            }
+            imageUrl
           }
         }
       }

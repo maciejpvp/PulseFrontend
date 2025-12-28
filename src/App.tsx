@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 
 import { useAuthStore } from "./store/auth.store";
 import "./amplify";
+import { PlaylistPage } from "./pages/PlaylistPage";
 
 
 const publicRoutes = [
@@ -22,6 +23,7 @@ const publicRoutes = [
             { index: true, element: <HomePage /> },
             { path: "artist/:artistId", element: <ArtistPage /> },
             { path: "album/:artistId/:albumId", element: <AlbumPage /> },
+            { path: "playlist/:playlistId", element: <PlaylistPage /> },
         ],
     },
 ];

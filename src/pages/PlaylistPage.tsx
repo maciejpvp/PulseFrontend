@@ -1,11 +1,12 @@
 import { useParams } from "react-router";
 import { usePlaylist } from "../graphql/queries/usePlaylist";
-import { Disc, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import { ErrorPage } from "./Error";
 import { SongItem } from "@/components/SongItem";
 import { usePlayerStore } from "@/store/player.store";
 import { useSongPlay } from "@/graphql/mutations/useSongPlay";
 import type { Song } from "../graphql/types";
+import { AlbumCover } from "@/components/Album/AlbumCover";
 
 export const PlaylistPage = () => {
     const { playlistId } = useParams<{ playlistId: string }>();
@@ -17,6 +18,8 @@ export const PlaylistPage = () => {
     if (isError || !playlist) return <ErrorPage />;
 
     const songs = playlist.songs.edges.map((edge) => edge.node);
+
+    console.log(playlist)
 
     const handlePlaySong = async (song: Song) => {
         try {
@@ -35,11 +38,9 @@ export const PlaylistPage = () => {
     };
 
     return (
-        <div className="w-full h-full overflow-y-auto bg-stone-950 text-stone-200">
-            <div className="flex items-end gap-8 p-8 bg-gradient-to-b from-stone-800/50 to-stone-950">
-                <div className="w-64 h-64 bg-stone-800 shadow-2xl flex items-center justify-center rounded-sm shrink-0">
-                    <Disc className="w-32 h-32 text-stone-600" />
-                </div>
+        <div className="w-full h-full overflow-y-auto text-stone-200">
+            <div className="flex items-end gap-8 p-8">
+                <AlbumCover imageUrl={playlist.imageUrl} />
 
                 <div className="flex flex-col gap-2 pb-2">
                     <span className="text-sm font-medium uppercase tracking-wider text-stone-400">Playlist</span>
