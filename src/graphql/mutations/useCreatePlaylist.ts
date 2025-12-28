@@ -1,70 +1,68 @@
 import { generateClient, type GraphQLResult } from "aws-amplify/api";
 import { gql } from "graphql-tag";
 import { useState } from "react";
-import type { Artist } from "../types";
+import type { Playlist } from "../types";
 
-const CREATE_ARTIST = gql`
-  mutation CreateArtist($name: String!) {
-    artistCreate(name: $name) {
-      artist {
+const CREATE_PLAYLIST = gql`
+  mutation CreatePlaylist($name: String!) {
+    playlistCreate(name: $name) {
+      playlist {
         id
+        name
       }
       imageUrl
-      fields # Stringified JSON from backend 
+      fields
     }
   }
 `;
 
 const client = generateClient();
 
-interface CreateArtistParams {
+interface CreatePlaylistParams {
     name: string;
     file?: File;
 }
 
-type CreateArtistResponse = {
-    artistCreate: {
-        artist: Artist;
+type CreatePlaylistResponse = {
+    playlistCreate: {
+        playlist: Playlist;
         imageUrl: string;
         fields: string;
     };
 };
 
-export const useCreateArtist = () => {
+export const useCreatePlaylist = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const createArtist = async ({ name, file }: CreateArtistParams) => {
+    const createPlaylist = async ({ name, file }: CreatePlaylistParams) => {
         setIsLoading(true);
         setError(null);
 
         try {
             const response = await client.graphql({
-                query: CREATE_ARTIST,
+                query: CREATE_PLAYLIST,
                 variables: { name },
-            }) as GraphQLResult<CreateArtistResponse>;
+            }) as GraphQLResult<CreatePlaylistResponse>;
 
-            const { artist, imageUrl, fields } = response.data.artistCreate;
+            const { playlist, imageUrl, fields } = response.data.playlistCreate;
 
-            // If picture is provided, upload it to S3
             if (file && imageUrl && fields) {
-                console.log(JSON.parse(fields))
                 const parsedFields = typeof fields === 'string' ? JSON.parse(fields) : fields;
-
                 await uploadToS3(imageUrl, parsedFields, file);
             }
 
-            return artist as Artist;
+            return playlist;
         } catch (err: unknown) {
-            console.error("Create Artist Error:", err);
-            setError((err as Error).message || "Failed to create artist");
+            console.error("Create Playlist Error:", err);
+            setError((err as Error).message || "Failed to create playlist");
             throw err;
         } finally {
             setIsLoading(false);
         }
     };
 
-    return { createArtist, isLoading, error };
+    return { createPlaylist, isLoading, error };
 };
 
 async function uploadToS3(url: string, fields: Record<string, string>, file: File) {

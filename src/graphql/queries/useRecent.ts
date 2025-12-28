@@ -17,14 +17,17 @@ const GET_RECENTLY_PLAYED = gql`
       }
       ... on AlbumPreview {
         id
+        imageUrl
         artist {
           id
+          imageUrl
         }
         name
       }
       ... on ArtistPreview {
         id
         name
+        imageUrl
       }
       ... on PlaylistPreview {
         id

@@ -24,6 +24,7 @@ export type Album = {
   __typename?: 'Album';
   artist: ArtistPreview;
   id: Scalars['ID']['output'];
+  imageUrl?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   songs: SongConnection;
 };
@@ -50,6 +51,7 @@ export type AlbumPreview = {
   __typename?: 'AlbumPreview';
   artist: ArtistPreview;
   id: Scalars['ID']['output'];
+  imageUrl?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
 };
 
@@ -61,8 +63,8 @@ export type AlbumQueryInput = {
 export type Artist = {
   __typename?: 'Artist';
   albums: AlbumConnection;
-  avatarUrl?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
+  imageUrl?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   songs: SongConnection;
 };
@@ -82,6 +84,7 @@ export type ArtistSongsArgs = {
 export type ArtistPreview = {
   __typename?: 'ArtistPreview';
   id: Scalars['ID']['output'];
+  imageUrl?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
 };
 
@@ -91,19 +94,33 @@ export type ContextType =
   | 'PLAYLIST'
   | 'SONG';
 
+export type CreateAlbumResponse = {
+  __typename?: 'CreateAlbumResponse';
+  album: Album;
+  fields: Scalars['String']['output'];
+  imageUrl: Scalars['String']['output'];
+};
+
 export type CreateArtistResponse = {
   __typename?: 'CreateArtistResponse';
   artist: Artist;
   fields: Scalars['String']['output'];
-  profilePictureURL: Scalars['String']['output'];
+  imageUrl: Scalars['String']['output'];
+};
+
+export type CreatePlaylistResponse = {
+  __typename?: 'CreatePlaylistResponse';
+  fields: Scalars['String']['output'];
+  imageUrl: Scalars['String']['output'];
+  playlist: Playlist;
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
-  albumCreate: Album;
+  albumCreate: CreateAlbumResponse;
   artistCreate: CreateArtistResponse;
   playlistAddToPlaylist: AddToPlaylistResult;
-  playlistCreate: Playlist;
+  playlistCreate: CreatePlaylistResponse;
   playlistRemoveFromPlaylist: RemoveFromPlaylistResult;
   /** Get S3 upload URL to upload mp3 file into bucket */
   songPlay: Scalars['String']['output'];
@@ -160,6 +177,7 @@ export type Playlist = {
   createdAt: Scalars['String']['output'];
   creator: User;
   id: Scalars['ID']['output'];
+  imageUrl?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   songs: SongConnection;
   visibility: PlaylistVisibility;
@@ -174,6 +192,7 @@ export type PlaylistSongsArgs = {
 export type PlaylistPreview = {
   __typename?: 'PlaylistPreview';
   id: Scalars['ID']['output'];
+  imageUrl?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
 };
 
@@ -271,12 +290,27 @@ export type User = {
   id: Scalars['ID']['output'];
 };
 
+export type CreateAlbumMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+  artistId: Scalars['ID']['input'];
+}>;
+
+
+export type CreateAlbumMutation = { __typename?: 'Mutation', albumCreate: { __typename?: 'CreateAlbumResponse', imageUrl: string, fields: string, album: { __typename?: 'Album', id: string, artist: { __typename?: 'ArtistPreview', id: string } } } };
+
 export type CreateArtistMutationVariables = Exact<{
   name: Scalars['String']['input'];
 }>;
 
 
-export type CreateArtistMutation = { __typename?: 'Mutation', artistCreate: { __typename?: 'CreateArtistResponse', profilePictureURL: string, fields: string } };
+export type CreateArtistMutation = { __typename?: 'Mutation', artistCreate: { __typename?: 'CreateArtistResponse', imageUrl: string, fields: string, artist: { __typename?: 'Artist', id: string } } };
+
+export type CreatePlaylistMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+}>;
+
+
+export type CreatePlaylistMutation = { __typename?: 'Mutation', playlistCreate: { __typename?: 'CreatePlaylistResponse', imageUrl: string, fields: string, playlist: { __typename?: 'Playlist', id: string, name: string } } };
 
 export type SongPlayMutationVariables = Exact<{
   input: SongPlayInput;
@@ -290,14 +324,14 @@ export type GetAlbumQueryVariables = Exact<{
 }>;
 
 
-export type GetAlbumQuery = { __typename?: 'Query', album: { __typename?: 'Album', id: string, name: string, artist: { __typename?: 'ArtistPreview', id: string, name: string }, songs: { __typename?: 'SongConnection', edges: Array<{ __typename?: 'SongEdge', node: { __typename?: 'Song', id: string, title: string, duration?: number | null, artist: { __typename?: 'ArtistPreview', id: string, name: string } } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean } } } };
+export type GetAlbumQuery = { __typename?: 'Query', album: { __typename?: 'Album', id: string, name: string, imageUrl?: string | null, artist: { __typename?: 'ArtistPreview', id: string, name: string }, songs: { __typename?: 'SongConnection', edges: Array<{ __typename?: 'SongEdge', node: { __typename?: 'Song', id: string, title: string, duration?: number | null, artist: { __typename?: 'ArtistPreview', id: string, name: string, imageUrl?: string | null } } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean } } } };
 
 export type GetArtistQueryVariables = Exact<{
   artistId: Scalars['ID']['input'];
 }>;
 
 
-export type GetArtistQuery = { __typename?: 'Query', artist: { __typename?: 'Artist', id: string, name: string, avatarUrl?: string | null, albums: { __typename?: 'AlbumConnection', edges: Array<{ __typename?: 'AlbumEdge', node: { __typename?: 'AlbumPreview', id: string, name: string } }> }, songs: { __typename?: 'SongConnection', edges: Array<{ __typename?: 'SongEdge', node: { __typename?: 'Song', id: string, title: string, duration?: number | null, artist: { __typename?: 'ArtistPreview', id: string, name: string } } }> } } };
+export type GetArtistQuery = { __typename?: 'Query', artist: { __typename?: 'Artist', id: string, name: string, imageUrl?: string | null, albums: { __typename?: 'AlbumConnection', edges: Array<{ __typename?: 'AlbumEdge', node: { __typename?: 'AlbumPreview', id: string, name: string } }> }, songs: { __typename?: 'SongConnection', edges: Array<{ __typename?: 'SongEdge', node: { __typename?: 'Song', id: string, title: string, duration?: number | null, artist: { __typename?: 'ArtistPreview', id: string, name: string } } }> } } };
 
 export type GetSongQueryVariables = Exact<{
   songId: Scalars['ID']['input'];
@@ -319,7 +353,7 @@ export type GetRecentlyPlayedQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetRecentlyPlayedQuery = { __typename?: 'Query', recentPlayed: Array<
     | { __typename: 'AlbumPreview', id: string, name: string, artist: { __typename?: 'ArtistPreview', id: string } }
-    | { __typename: 'ArtistPreview', id: string, name: string }
+    | { __typename: 'ArtistPreview', id: string, name: string, imageUrl?: string | null }
     | { __typename: 'PlaylistPreview', id: string, name: string }
     | { __typename: 'SongPreview', id: string, artistId: string, title: string }
   > };

@@ -1,14 +1,13 @@
 import { useState, useRef, useEffect } from "react";
-import { useCreateArtist } from "@/graphql/mutations/useCreateArtist";
+import { useCreatePlaylist } from "@/graphql/mutations/useCreatePlaylist";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ImagePlus, Loader2, X } from "lucide-react";
 import { useNavigate } from "react-router";
 
-export const CreateArtist = () => {
-    const { createArtist, isLoading, error } = useCreateArtist();
-
+export const CreatePlaylist = () => {
+    const { createPlaylist, isLoading, error } = useCreatePlaylist();
     const navigate = useNavigate();
 
     const [name, setName] = useState("");
@@ -22,9 +21,7 @@ export const CreateArtist = () => {
             const file = e.target.files[0];
             setSelectedFile(file);
 
-            // Cleanup old preview if it exists
             if (previewUrl) URL.revokeObjectURL(previewUrl);
-
             const objectUrl = URL.createObjectURL(file);
             setPreviewUrl(objectUrl);
         }
@@ -37,7 +34,6 @@ export const CreateArtist = () => {
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
-    // Cleanup on unmount
     useEffect(() => {
         return () => {
             if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -46,16 +42,13 @@ export const CreateArtist = () => {
 
     const handleSubmit = async () => {
         try {
-            const artist = await createArtist({
+            const playlist = await createPlaylist({
                 name: name,
                 file: selectedFile
             });
 
-            console.log(artist);
-
-            navigate(`/artist/${artist.id}`);
-
-            console.log("Artist Created successfully:", artist);
+            console.log("Playlist Created successfully:", playlist);
+            navigate(`/playlist/${playlist.id}`);
 
             // Reset form
             setName("");
@@ -70,11 +63,11 @@ export const CreateArtist = () => {
     return (
         <div className="flex flex-col gap-6 py-4">
             <div className="grid w-full items-center gap-1.5">
-                <Label htmlFor="artist-name">Artist Name</Label>
+                <Label htmlFor="playlist-name">Playlist Name</Label>
                 <Input
-                    id="artist-name"
+                    id="playlist-name"
                     type="text"
-                    placeholder="Enter artist name..."
+                    placeholder="Enter playlist name..."
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="bg-stone-900/50 border-stone-800"
@@ -82,13 +75,13 @@ export const CreateArtist = () => {
             </div>
 
             <div className="grid w-full items-center gap-1.5">
-                <Label>Profile Picture (Optional)</Label>
+                <Label>Playlist Cover (Optional)</Label>
                 <div
                     onClick={() => fileInputRef.current?.click()}
                     className={`
                         relative group cursor-pointer
                         w-full aspect-square max-w-[200px] mx-auto
-                        rounded-full border-2 border-dashed 
+                        rounded-md border-2 border-dashed 
                         flex flex-col items-center justify-center gap-2
                         transition-all duration-200
                         ${previewUrl ? 'border-transparent' : 'border-stone-800 hover:border-stone-600 bg-stone-900/30 hover:bg-stone-900/50'}
@@ -99,9 +92,9 @@ export const CreateArtist = () => {
                             <img
                                 src={previewUrl}
                                 alt="Preview"
-                                className="w-full h-full object-cover rounded-full shadow-xl"
+                                className="w-full h-full object-cover rounded-md shadow-xl"
                             />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex items-center justify-center">
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-md flex items-center justify-center">
                                 <ImagePlus className="w-8 h-8 text-white" />
                             </div>
                             <Button
@@ -122,7 +115,7 @@ export const CreateArtist = () => {
                             <div className="p-4 rounded-full bg-stone-900/50 group-hover:scale-110 transition-transform">
                                 <ImagePlus className="w-8 h-8 text-stone-400" />
                             </div>
-                            <span className="text-sm text-stone-500 font-medium">Upload Image</span>
+                            <span className="text-sm text-stone-500 font-medium">Upload Cover</span>
                         </>
                     )}
                 </div>
@@ -149,10 +142,10 @@ export const CreateArtist = () => {
                 {isLoading ? (
                     <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creating Artist...
+                        Creating Playlist...
                     </>
                 ) : (
-                    "Create Artist"
+                    "Create Playlist"
                 )}
             </Button>
         </div>

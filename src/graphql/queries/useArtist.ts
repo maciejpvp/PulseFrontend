@@ -13,7 +13,7 @@ const GET_ARTIST = gql`
     artist(artistId: $artistId) {
       id
       name
-      avatarUrl
+      imageUrl
       albums {
         edges {
           node {

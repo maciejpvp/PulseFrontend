@@ -14,6 +14,7 @@ query GetAlbum($input: AlbumQueryInput!) {
 album(input: $input) {
   id
   name
+  imageUrl
   artist {
     id
     name
@@ -27,6 +28,7 @@ album(input: $input) {
         artist {
           id
           name
+          imageUrl 
         }
       }
     }

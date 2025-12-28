@@ -4,6 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PlayerBar } from "@/components/PlayerBar";
+import { CreateModal } from "@/components/modals/CreateModal";
 
 export const RootLayout = () => {
     return (
@@ -17,6 +18,9 @@ export const RootLayout = () => {
                     </main>
                 </div>
                 <PlayerBar />
+            </div>
+            <div className="fixed bottom-4 right-4">
+                <CreateModal />
             </div>
         </ThemeProvider>
     )

@@ -30,7 +30,7 @@ type Artist {
   name: String!
   songs(first: Int = 10, after: String): SongConnection!
   albums(first: Int = 10, after: String): AlbumConnection!
-  avatarUrl: String
+  imageUrl: String
 }
 
 type ArtistPreview {

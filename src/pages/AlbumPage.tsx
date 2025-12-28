@@ -1,11 +1,13 @@
 import { useNavigate, useParams } from "react-router";
 import { useAlbum } from "../graphql/queries/useAlbum";
-import { Disc, Clock, User, Play } from "lucide-react";
+import { Clock, User, Play } from "lucide-react";
 import { formatTime } from "@/lib/formatTime";
 import { ErrorPage } from "./Error";
 import { usePlayerStore } from "@/store/player.store";
 import { useSongPlay } from "@/graphql/mutations/useSongPlay";
 import type { Song } from "../graphql/types";
+import { AlbumCover } from "../components/Album/AlbumCover";
+
 
 export const AlbumPage = () => {
     const navigate = useNavigate();
@@ -13,6 +15,7 @@ export const AlbumPage = () => {
     const { album, isLoading, isError } = useAlbum(albumId ?? "", artistId ?? "");
     const { playSong } = usePlayerStore();
     const { playSongMutation } = useSongPlay();
+
 
     if (isLoading) return <div className="p-8 text-stone-400">Loading...</div>;
     if (isError || !album) return <ErrorPage />;
@@ -40,12 +43,12 @@ export const AlbumPage = () => {
         }
     };
 
+    console.log(album);
+
     return (
         <div className="w-full h-full overflow-y-auto bg-stone-950 text-stone-200">
             <div className="flex items-end gap-8 p-8 bg-gradient-to-b from-stone-800/50 to-stone-950">
-                <div className="w-64 h-64 bg-stone-800 shadow-2xl flex items-center justify-center rounded-sm shrink-0">
-                    <Disc className="w-32 h-32 text-stone-600" />
-                </div>
+                <AlbumCover key={albumId} imageUrl={album.imageUrl} />
 
                 <div className="flex flex-col gap-2 pb-2">
                     <span className="text-sm font-medium uppercase tracking-wider text-stone-400">Album</span>

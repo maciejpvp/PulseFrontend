@@ -1,17 +1,17 @@
 import { useState, useRef, useEffect } from "react";
-import { useCreateArtist } from "@/graphql/mutations/useCreateArtist";
+import { useCreateAlbum } from "@/graphql/mutations/useCreateAlbum";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ImagePlus, Loader2, X } from "lucide-react";
 import { useNavigate } from "react-router";
 
-export const CreateArtist = () => {
-    const { createArtist, isLoading, error } = useCreateArtist();
-
+export const CreateAlbum = () => {
+    const { createAlbum, isLoading, error } = useCreateAlbum();
     const navigate = useNavigate();
 
     const [name, setName] = useState("");
+    const [artistId, setArtistId] = useState("");
     const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -22,9 +22,7 @@ export const CreateArtist = () => {
             const file = e.target.files[0];
             setSelectedFile(file);
 
-            // Cleanup old preview if it exists
             if (previewUrl) URL.revokeObjectURL(previewUrl);
-
             const objectUrl = URL.createObjectURL(file);
             setPreviewUrl(objectUrl);
         }
@@ -37,7 +35,6 @@ export const CreateArtist = () => {
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
-    // Cleanup on unmount
     useEffect(() => {
         return () => {
             if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -46,19 +43,18 @@ export const CreateArtist = () => {
 
     const handleSubmit = async () => {
         try {
-            const artist = await createArtist({
+            const album = await createAlbum({
                 name: name,
+                artistId: artistId,
                 file: selectedFile
             });
 
-            console.log(artist);
-
-            navigate(`/artist/${artist.id}`);
-
-            console.log("Artist Created successfully:", artist);
+            console.log("Album Created successfully:", album);
+            navigate(`/album/${album.artist.id}/${album.id}`);
 
             // Reset form
             setName("");
+            setArtistId("");
             setSelectedFile(undefined);
             if (fileInputRef.current) fileInputRef.current.value = "";
 
@@ -70,11 +66,11 @@ export const CreateArtist = () => {
     return (
         <div className="flex flex-col gap-6 py-4">
             <div className="grid w-full items-center gap-1.5">
-                <Label htmlFor="artist-name">Artist Name</Label>
+                <Label htmlFor="album-name">Album Name</Label>
                 <Input
-                    id="artist-name"
+                    id="album-name"
                     type="text"
-                    placeholder="Enter artist name..."
+                    placeholder="Enter album name..."
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="bg-stone-900/50 border-stone-800"
@@ -82,13 +78,28 @@ export const CreateArtist = () => {
             </div>
 
             <div className="grid w-full items-center gap-1.5">
-                <Label>Profile Picture (Optional)</Label>
+                <Label htmlFor="artist-id">Artist ID</Label>
+                <Input
+                    id="artist-id"
+                    type="text"
+                    placeholder="Enter artist ID..."
+                    value={artistId}
+                    onChange={(e) => setArtistId(e.target.value)}
+                    className="bg-stone-900/50 border-stone-800"
+                />
+                <p className="text-[10px] text-stone-500 px-1">
+                    You can find the Artist ID in the URL of the artist's page.
+                </p>
+            </div>
+
+            <div className="grid w-full items-center gap-1.5">
+                <Label>Album Cover (Optional)</Label>
                 <div
                     onClick={() => fileInputRef.current?.click()}
                     className={`
                         relative group cursor-pointer
                         w-full aspect-square max-w-[200px] mx-auto
-                        rounded-full border-2 border-dashed 
+                        rounded-md border-2 border-dashed 
                         flex flex-col items-center justify-center gap-2
                         transition-all duration-200
                         ${previewUrl ? 'border-transparent' : 'border-stone-800 hover:border-stone-600 bg-stone-900/30 hover:bg-stone-900/50'}
@@ -99,9 +110,9 @@ export const CreateArtist = () => {
                             <img
                                 src={previewUrl}
                                 alt="Preview"
-                                className="w-full h-full object-cover rounded-full shadow-xl"
+                                className="w-full h-full object-cover rounded-md shadow-xl"
                             />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex items-center justify-center">
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-md flex items-center justify-center">
                                 <ImagePlus className="w-8 h-8 text-white" />
                             </div>
                             <Button
@@ -122,7 +133,7 @@ export const CreateArtist = () => {
                             <div className="p-4 rounded-full bg-stone-900/50 group-hover:scale-110 transition-transform">
                                 <ImagePlus className="w-8 h-8 text-stone-400" />
                             </div>
-                            <span className="text-sm text-stone-500 font-medium">Upload Image</span>
+                            <span className="text-sm text-stone-500 font-medium">Upload Cover</span>
                         </>
                     )}
                 </div>
@@ -143,16 +154,16 @@ export const CreateArtist = () => {
 
             <Button
                 onClick={handleSubmit}
-                disabled={isLoading || !name}
+                disabled={isLoading || !name || !artistId}
                 className="w-full h-11 text-base font-semibold transition-all active:scale-[0.98]"
             >
                 {isLoading ? (
                     <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creating Artist...
+                        Creating Album...
                     </>
                 ) : (
-                    "Create Artist"
+                    "Create Album"
                 )}
             </Button>
         </div>

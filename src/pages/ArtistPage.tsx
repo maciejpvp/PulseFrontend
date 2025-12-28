@@ -40,7 +40,7 @@ export const ArtistPage = () => {
 
     return <div className="w-full">
         <div className="flex items-start gap-4">
-            <ArtistPic url={artist.avatarUrl} />
+            <ArtistPic key={artistId} url={artist.imageUrl} />
             <div className="flex flex-col gap-2">
                 <h1 className="text-4xl font-bold mt-4">{artist.name}</h1>
                 <button className="bg-stone-800 text-stone-200 px-4 py-2 rounded-md hover:bg-stone-700 transition-colors">Follow</button>
