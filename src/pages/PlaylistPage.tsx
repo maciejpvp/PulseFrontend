@@ -7,6 +7,7 @@ import { usePlayerStore } from "@/store/player.store";
 import { useSongPlay } from "@/graphql/mutations/useSongPlay";
 import type { Song } from "../graphql/types";
 import { AlbumCover } from "@/components/Album/AlbumCover";
+import { BookmarkButton } from "@/components/BookmarkButton";
 
 export const PlaylistPage = () => {
     const { playlistId } = useParams<{ playlistId: string }>();
@@ -45,8 +46,16 @@ export const PlaylistPage = () => {
                 <div className="flex flex-col gap-2 pb-2">
                     <span className="text-sm font-medium uppercase tracking-wider text-stone-400">Playlist</span>
                     <h1 className="text-6xl font-black text-white tracking-tight">{playlist.name}</h1>
-                    <div className="flex items-center gap-2 text-stone-300 font-medium mt-4">
-                        <span className="text-stone-400">{songs.length} songs</span>
+                    <div className="flex items-center gap-4 mt-4">
+                        <div className="flex items-center gap-2 text-stone-300 font-medium">
+                            <span className="text-stone-400">{songs.length} songs</span>
+                        </div>
+                        <BookmarkButton
+                            defaultState={playlist.isBookmarked}
+                            itemId={playlist.id}
+                            itemType="PLAYLIST"
+                            className="bg-stone-800/50 hover:bg-stone-800"
+                        />
                     </div>
                 </div>
             </div>

@@ -9,6 +9,7 @@ query GetPlaylist($playlistId: ID!) {
     id
     name
     imageUrl
+    isBookmarked
     songs {
       edges {
         node {
