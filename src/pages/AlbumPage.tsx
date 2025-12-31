@@ -7,6 +7,7 @@ import { usePlayerStore } from "@/store/player.store";
 import { useSongPlay } from "@/graphql/mutations/useSongPlay";
 import type { Song } from "../graphql/types";
 import { AlbumCover } from "../components/Album/AlbumCover";
+import { BookmarkButton } from "@/components/BookmarkButton";
 
 
 export const AlbumPage = () => {
@@ -46,20 +47,21 @@ export const AlbumPage = () => {
     console.log(album);
 
     return (
-        <div className="w-full h-full overflow-y-auto bg-stone-950 text-stone-200">
-            <div className="flex items-end gap-8 p-8 bg-gradient-to-b from-stone-800/50 to-stone-950">
+        <div className="w-full h-full overflow-y-auto">
+            <div className="flex items-end gap-8 p-8">
                 <AlbumCover key={albumId} imageUrl={album.imageUrl} />
 
-                <div className="flex flex-col gap-2 pb-2">
+                <div className="flex flex-col pb-2">
                     <span className="text-sm font-medium uppercase tracking-wider text-stone-400">Album</span>
                     <h1 className="text-6xl font-black text-white tracking-tight">{album.name}</h1>
-                    <div className="flex items-center gap-2 text-stone-300 font-medium mt-4">
+                    <div className="flex items-center gap-2 text-stone-300 font-medium ml-2">
                         <div className="w-6 h-6 bg-stone-700 rounded-full flex items-center justify-center">
                             <User size={16} />
                         </div>
                         <span className="hover:underline cursor-pointer" onClick={handleNavigateToArtist}>{album.artist.name}</span>
                         <span className="text-stone-500">•</span>
                         <span className="text-stone-400">{songs.length} songs</span>
+                        <BookmarkButton defaultState={album.isBookmarked} itemId={album.id} artistId={album.artist.id} itemType="ALBUM" />
                     </div>
                 </div>
             </div>

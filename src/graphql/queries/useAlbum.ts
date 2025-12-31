@@ -15,6 +15,7 @@ album(input: $input) {
   id
   name
   imageUrl
+  isBookmarked
   artist {
     id
     name
