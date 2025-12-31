@@ -3,6 +3,7 @@ import { useArtist } from "../graphql/queries/useArtist";
 import { ArtistPic } from "@/components/Artist/ArtistPic";
 import { CollectionView } from "@/components/CollectionView";
 import { ErrorPage } from "./Error";
+import { BookmarkButton } from "@/components/BookmarkButton";
 // import { SongItem } from "@/components/SongItem";
 // import { usePlayerStore } from "@/store/player.store";
 // import { useSongPlay } from "@/graphql/mutations/useSongPlay";
@@ -43,7 +44,7 @@ export const ArtistPage = () => {
             <ArtistPic key={artistId} url={artist.imageUrl} />
             <div className="flex flex-col gap-2">
                 <h1 className="text-4xl font-bold mt-4">{artist.name}</h1>
-                <button className="bg-stone-800 text-stone-200 px-4 py-2 rounded-md hover:bg-stone-700 transition-colors">Follow</button>
+                <BookmarkButton itemId={artist.id} itemType="ARTIST" artistId={artist.id} defaultState={artist.isBookmarked} />
             </div>
         </div>
 

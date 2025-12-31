@@ -14,6 +14,7 @@ const GET_ARTIST = gql`
       id
       name
       imageUrl
+      isBookmarked
       albums {
         edges {
           node {

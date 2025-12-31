@@ -25,14 +25,14 @@ export const LibraryPage = () => {
 
     return (
         <div className="p-8">
-            <h1 className="text-3xl font-bold text-white mb-8">Library</h1>
+            <h1 className="text-3xl font-bold text-white mb-4">Library</h1>
 
             {bookmarks.length === 0 ? (
                 <div className="text-stone-400">
                     You haven't bookmarked anything yet.
                 </div>
             ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+                <div className="flex flex-wrap gap-4">
                     {bookmarks.map((item) => {
                         console.log(item?.id);
                         if (item.__typename === "AlbumPreview") {
@@ -54,15 +54,15 @@ export const LibraryPage = () => {
                                 />
                             );
                         }
-                        // if (item.__typename === "ArtistPreview") {
-                        //     return (
-                        //         <CollectionView
-                        //             key={item.id}
-                        //             type="artist"
-                        //             artist={item}
-                        //         />
-                        //     );
-                        // }
+                        if (item.__typename === "ArtistPreview") {
+                            return (
+                                <CollectionView
+                                    key={item.id}
+                                    type="artist"
+                                    artist={item}
+                                />
+                            );
+                        }
                         // if (item.__typename === "SongPreview") {
                         //     return (
                         //         <CollectionView

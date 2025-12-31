@@ -21,6 +21,11 @@ const GET_BOOKMARKS = gql`
               id
             }
           }
+          ... on ArtistPreview {
+            id
+            name
+            imageUrl
+          }
         }
       }
     }

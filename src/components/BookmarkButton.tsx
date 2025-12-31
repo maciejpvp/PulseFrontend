@@ -10,9 +10,10 @@ interface BookmarkButtonProps {
     artistId?: string;
     className?: string;
     defaultState?: boolean;
+    customInside?: React.ReactNode;
 }
 
-export const BookmarkButton = ({ itemId, itemType, artistId, className, defaultState = false }: BookmarkButtonProps) => {
+export const BookmarkButton = ({ itemId, itemType, artistId, className, defaultState = false, customInside }: BookmarkButtonProps) => {
     const { addBookmark, removeBookmark } = useBookmark();
     const [isPending, startTransition] = useTransition();
 
@@ -67,12 +68,12 @@ export const BookmarkButton = ({ itemId, itemType, artistId, className, defaultS
             )}
             title={optimisticBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
         >
-            <Heart
+            {customInside || <Heart
                 className={cn(
                     "w-6 h-6 transition-colors duration-200",
                     optimisticBookmarked && "fill-current"
                 )}
-            />
+            />}
         </button>
     );
 };

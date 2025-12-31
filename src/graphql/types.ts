@@ -273,6 +273,7 @@ export type Query = {
   bookmarks: BookmarkConnection;
   playlist: Playlist;
   recentPlayed: Array<RecentPlayedItem>;
+  search?: Maybe<SearchResponse>;
   song: Song;
 };
 
@@ -292,12 +293,27 @@ export type QueryPlaylistArgs = {
 };
 
 
+export type QuerySearchArgs = {
+  input: SearchInput;
+};
+
+
 export type QuerySongArgs = {
   artistId: Scalars['ID']['input'];
   songId: Scalars['ID']['input'];
 };
 
 export type RecentPlayedItem = AlbumPreview | ArtistPreview | PlaylistPreview | SongPreview;
+
+export type SearchInput = {
+  query: Scalars['String']['input'];
+  type: Scalars['String']['input'];
+};
+
+export type SearchResponse = {
+  __typename?: 'SearchResponse';
+  items: Array<BookmarkItem>;
+};
 
 export type Song = {
   __typename?: 'Song';
@@ -410,7 +426,7 @@ export type GetAlbumQueryVariables = Exact<{
 }>;
 
 
-export type GetAlbumQuery = { __typename?: 'Query', album: { __typename?: 'Album', id: string, name: string, imageUrl?: string | null, artist: { __typename?: 'ArtistPreview', id: string, name: string }, songs: { __typename?: 'SongConnection', edges: Array<{ __typename?: 'SongEdge', node: { __typename?: 'Song', id: string, title: string, duration?: number | null, artist: { __typename?: 'ArtistPreview', id: string, name: string, imageUrl?: string | null } } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean } } } };
+export type GetAlbumQuery = { __typename?: 'Query', album: { __typename?: 'Album', id: string, name: string, imageUrl?: string | null, isBookmarked: boolean, artist: { __typename?: 'ArtistPreview', id: string, name: string }, songs: { __typename?: 'SongConnection', edges: Array<{ __typename?: 'SongEdge', node: { __typename?: 'Song', id: string, title: string, duration?: number | null, artist: { __typename?: 'ArtistPreview', id: string, name: string, imageUrl?: string | null } } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean } } } };
 
 export type GetArtistQueryVariables = Exact<{
   artistId: Scalars['ID']['input'];
@@ -418,6 +434,16 @@ export type GetArtistQueryVariables = Exact<{
 
 
 export type GetArtistQuery = { __typename?: 'Query', artist: { __typename?: 'Artist', id: string, name: string, imageUrl?: string | null, albums: { __typename?: 'AlbumConnection', edges: Array<{ __typename?: 'AlbumEdge', node: { __typename?: 'AlbumPreview', id: string, name: string, imageUrl?: string | null } }> } } };
+
+export type GetBookmarksQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetBookmarksQuery = { __typename?: 'Query', bookmarks: { __typename?: 'BookmarkConnection', edges?: Array<{ __typename?: 'BookmarkEdge', node:
+        | { __typename: 'AlbumPreview', id: string, name: string, artist: { __typename?: 'ArtistPreview', id: string } }
+        | { __typename: 'ArtistPreview' }
+        | { __typename: 'PlaylistPreview', id: string, name: string, imageUrl?: string | null }
+        | { __typename: 'SongPreview' }
+       }> | null } };
 
 export type GetSongQueryVariables = Exact<{
   songId: Scalars['ID']['input'];
