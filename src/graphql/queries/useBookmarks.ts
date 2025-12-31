@@ -17,6 +17,7 @@ const GET_BOOKMARKS = gql`
           ... on AlbumPreview {
             id
             name
+            imageUrl
             artist {
               id
             }

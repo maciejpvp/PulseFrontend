@@ -1,14 +1,27 @@
 type Props = {
     label: string;
-    icon: React.ReactNode;
+    subLabel?: string;
+    icon?: React.ReactNode;
+    imageUrl?: string;
     onClick?: () => void;
 }
 
-export const NavbarItem = ({ label, icon, onClick }: Props) => {
+export const NavbarItem = ({ label, subLabel, icon, imageUrl, onClick }: Props) => {
     return (
-        <button onClick={onClick} className="flex items-center gap-2 p-2 pl-4 hover:bg-sidebar-accent rounded-xs cursor-pointer">
-            {icon}
-            <p>{label}</p>
+        <button onClick={onClick} className="flex items-center gap-3 p-2 pl-4 hover:bg-sidebar-accent rounded-md cursor-pointer w-full text-left transition-colors group">
+            <div className="flex-shrink-0 w-7 h-7 flex items-center justify-center overflow-hidden rounded-sm group-hover:bg-stone-700 transition-colors">
+                {imageUrl ? (
+                    <img src={imageUrl} alt={label} className="w-full h-full object-cover" />
+                ) : (
+                    <div className="text-stone-400 group-hover:text-stone-200 transition-colors">
+                        {icon}
+                    </div>
+                )}
+            </div>
+            <div className="flex flex-col min-w-0">
+                <p className="text-sm font-medium truncate text-stone-300 group-hover:text-white transition-colors">{label}</p>
+                {subLabel && <p className="text-xs text-stone-500 truncate group-hover:text-stone-400 transition-colors">{subLabel}</p>}
+            </div>
         </button>
     )
 }
