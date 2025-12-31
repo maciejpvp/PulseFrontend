@@ -5,12 +5,17 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Music, Loader2, X, FileAudio } from "lucide-react";
 
-export const CreateSong = () => {
+interface CreateSongProps {
+    artistId?: string;
+    albumId?: string;
+}
+
+export const CreateSong = ({ artistId: initialArtistId, albumId: initialAlbumId }: CreateSongProps) => {
     const { createSong, isLoading, error } = useCreateSong();
 
     const [title, setTitle] = useState("");
-    const [artistId, setArtistId] = useState("");
-    const [albumId, setAlbumId] = useState("");
+    const [artistId, setArtistId] = useState(initialArtistId || "");
+    const [albumId, setAlbumId] = useState(initialAlbumId || "");
     const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
     const [duration, setDuration] = useState<number>(0);
 

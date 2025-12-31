@@ -6,12 +6,16 @@ import { Button } from "@/components/ui/button";
 import { ImagePlus, Loader2, X } from "lucide-react";
 import { useNavigate } from "react-router";
 
-export const CreateAlbum = () => {
+interface CreateAlbumProps {
+    artistId?: string;
+}
+
+export const CreateAlbum = ({ artistId: initialArtistId }: CreateAlbumProps) => {
     const { createAlbum, isLoading, error } = useCreateAlbum();
     const navigate = useNavigate();
 
     const [name, setName] = useState("");
-    const [artistId, setArtistId] = useState("");
+    const [artistId, setArtistId] = useState(initialArtistId || "");
     const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 

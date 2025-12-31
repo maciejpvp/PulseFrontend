@@ -4,8 +4,8 @@ import { CreatePlaylist } from "@/components/modals/CreatePlaylist";
 import { CreateSong } from "@/components/modals/CreateSong";
 
 export const entityTypes = [
-    { type: "artist", name: "Artist", component: <CreateArtist /> },
-    { type: "album", name: "Album", component: <CreateAlbum /> },
-    { type: "playlist", name: "Playlist", component: <CreatePlaylist /> },
-    { type: "song", name: "Song", component: <CreateSong /> },
+    { type: "artist", name: "Artist", component: CreateArtist },
+    { type: "album", name: "Album", component: CreateAlbum },
+    { type: "playlist", name: "Playlist", component: CreatePlaylist },
+    { type: "song", name: "Song", component: CreateSong },
 ]
