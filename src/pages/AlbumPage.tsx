@@ -9,6 +9,7 @@ import type { Song } from "../graphql/types";
 import { AlbumCover } from "../components/Album/AlbumCover";
 import { BookmarkButton } from "@/components/BookmarkButton";
 import { useImageColor } from "@/hooks/useImageColor";
+import { ArtistPic } from "@/components/Artist/ArtistPic";
 
 
 export const AlbumPage = () => {
@@ -40,7 +41,7 @@ export const AlbumPage = () => {
                     contextType: "ALBUM"
                 }
             });
-            playSong(song, url, album.id, "ALBUM", songs);
+            playSong(song, url, album.id, "ALBUM", album.name, songs);
         } catch (error) {
             console.error("Failed to play song:", error);
         }
@@ -66,7 +67,7 @@ export const AlbumPage = () => {
                         <h1 className="text-6xl font-black text-white tracking-tight">{album.name}</h1>
                         <div className="flex items-center gap-2 text-stone-300 font-medium ml-2">
                             <div className="w-6 h-6 bg-stone-700 rounded-full flex items-center justify-center">
-                                <User size={16} />
+                                {album.artist.imageUrl ? <ArtistPic url={album.artist.imageUrl} size={6} /> : <User size={16} />}
                             </div>
                             <span className="hover:underline cursor-pointer" onClick={handleNavigateToArtist}>{album.artist.name}</span>
                             <span className="text-stone-500">•</span>

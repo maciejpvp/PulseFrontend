@@ -19,6 +19,7 @@ album(input: $input) {
   artist {
     id
     name
+    imageUrl
   }
   songs {
     edges {
@@ -26,6 +27,7 @@ album(input: $input) {
         id
         title
         duration
+        imageUrl
         artist {
           id
           name

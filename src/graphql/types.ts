@@ -320,6 +320,7 @@ export type Song = {
   artist: ArtistPreview;
   duration?: Maybe<Scalars['Int']['output']>;
   id: Scalars['ID']['output'];
+  imageUrl?: Maybe<Scalars['String']['output']>;
   title: Scalars['String']['output'];
 };
 
@@ -351,6 +352,7 @@ export type SongPreview = {
   __typename?: 'SongPreview';
   artistId: Scalars['ID']['output'];
   id: Scalars['ID']['output'];
+  imageUrl?: Maybe<Scalars['String']['output']>;
   title: Scalars['String']['output'];
 };
 
@@ -433,14 +435,14 @@ export type GetArtistQueryVariables = Exact<{
 }>;
 
 
-export type GetArtistQuery = { __typename?: 'Query', artist: { __typename?: 'Artist', id: string, name: string, imageUrl?: string | null, albums: { __typename?: 'AlbumConnection', edges: Array<{ __typename?: 'AlbumEdge', node: { __typename?: 'AlbumPreview', id: string, name: string, imageUrl?: string | null } }> } } };
+export type GetArtistQuery = { __typename?: 'Query', artist: { __typename?: 'Artist', id: string, name: string, imageUrl?: string | null, isBookmarked: boolean, albums: { __typename?: 'AlbumConnection', edges: Array<{ __typename?: 'AlbumEdge', node: { __typename?: 'AlbumPreview', id: string, name: string, imageUrl?: string | null } }> } } };
 
 export type GetBookmarksQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetBookmarksQuery = { __typename?: 'Query', bookmarks: { __typename?: 'BookmarkConnection', edges?: Array<{ __typename?: 'BookmarkEdge', node:
-        | { __typename: 'AlbumPreview', id: string, name: string, artist: { __typename?: 'ArtistPreview', id: string } }
-        | { __typename: 'ArtistPreview' }
+        | { __typename: 'AlbumPreview', id: string, name: string, imageUrl?: string | null, artist: { __typename?: 'ArtistPreview', id: string } }
+        | { __typename: 'ArtistPreview', id: string, name: string, imageUrl?: string | null }
         | { __typename: 'PlaylistPreview', id: string, name: string, imageUrl?: string | null }
         | { __typename: 'SongPreview' }
        }> | null } };
@@ -469,3 +471,15 @@ export type GetRecentlyPlayedQuery = { __typename?: 'Query', recentPlayed: Array
     | { __typename: 'PlaylistPreview', id: string, name: string }
     | { __typename: 'SongPreview', id: string, artistId: string, title: string }
   > };
+
+export type SearchQueryVariables = Exact<{
+  input: SearchInput;
+}>;
+
+
+export type SearchQuery = { __typename?: 'Query', search?: { __typename?: 'SearchResponse', items: Array<
+      | { __typename: 'AlbumPreview', id: string, name: string, imageUrl?: string | null, artist: { __typename?: 'ArtistPreview', id: string, name: string } }
+      | { __typename: 'ArtistPreview', id: string, name: string, imageUrl?: string | null }
+      | { __typename: 'PlaylistPreview', id: string, name: string, imageUrl?: string | null }
+      | { __typename: 'SongPreview', id: string, title: string, artistId: string }
+    > } | null };

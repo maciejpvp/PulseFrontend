@@ -19,6 +19,7 @@ type PlayerStore = {
     originalQueue: Song[];
     contextId: string | null;
     contextType: ContextType | null;
+    contextName: string | null;
 
     setCurrentSong: (song: Song | null) => void;
     togglePlay: () => void;
@@ -32,7 +33,7 @@ type PlayerStore = {
     startCrossfade: (playMutation: (args: MutationSongPlayArgs) => Promise<string>) => Promise<void>;
     nextSong: (playMutation: (args: MutationSongPlayArgs) => Promise<string>, forceNext?: boolean) => Promise<void>;
     previousSong: (playMutation: (args: MutationSongPlayArgs) => Promise<string>) => Promise<void>;
-    playSong: (song: Song, url: string, contextId: string, contextType: ContextType, queue?: Song[]) => void;
+    playSong: (song: Song, url: string, contextId: string, contextType: ContextType, contextName: string, queue?: Song[]) => void;
 };
 
 export const usePlayerStore = create<PlayerStore>((set, get) => ({
@@ -50,6 +51,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     isCrossfading: false,
     contextId: null,
     contextType: null,
+    contextName: null,
     isShuffled: false,
     repeatMode: "none",
     originalQueue: [],
@@ -215,7 +217,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     },
 
     nextSong: async (playMutation, forceNext = false) => {
-        const { queue, currentSong, playSong, contextId, contextType, repeatMode, nextSongData, startCrossfade } = get();
+        const { queue, currentSong, playSong, contextId, contextType, contextName, repeatMode, nextSongData, startCrossfade } = get();
         if (queue.length === 0 || !currentSong || !contextId || !contextType) return;
 
         if (nextSongData && !forceNext) {
@@ -252,14 +254,14 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
                     contextType
                 }
             });
-            playSong(nextSong, url, contextId, contextType);
+            playSong(nextSong, url, contextId, contextType, contextName!);
         } catch (error) {
             console.error("Failed to play next song:", error);
         }
     },
 
     previousSong: async (playMutation) => {
-        const { queue, currentSong, playSong, audio, contextId, contextType } = get();
+        const { queue, currentSong, playSong, audio, contextId, contextType, contextName } = get();
         if (queue.length === 0 || !currentSong || !contextId || !contextType) return;
 
         if (audio && audio.currentTime > 3) {
@@ -280,13 +282,13 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
                     contextType
                 }
             });
-            playSong(prevSong, url, contextId, contextType);
+            playSong(prevSong, url, contextId, contextType, contextName!);
         } catch (error) {
             console.error("Failed to play previous song:", error);
         }
     },
 
-    playSong: (song, url, contextId, contextType, queue) => {
+    playSong: (song, url, contextId, contextType, contextName, queue) => {
         const { audio1, audio2, activeAudioIndex, volume } = get();
         if (!audio1 || !audio2) return;
 
@@ -306,6 +308,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
             isPlaying: true,
             contextId,
             contextType,
+            contextName,
             queue: queue || get().queue,
             originalQueue: queue || get().originalQueue,
             audio: activeAudio,

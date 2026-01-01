@@ -84,7 +84,7 @@ export const CollectionView = (props: Props) => {
             console.log(fullSong);
 
             const url = await playSongMutation(input);
-            playSong(fullSong, url, artistId, "ARTIST", [])
+            playSong(fullSong, url, artistId, "ARTIST", fullSong.artist.name, [])
         }
     }
 

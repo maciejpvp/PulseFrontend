@@ -92,8 +92,12 @@ export const PlayerBar = () => {
         <div className="fixed bottom-0 left-0 right-0 h-24 bg-black border-t border-white/10 px-4 flex items-center justify-between z-50">
             {/* Song Info */}
             <div className="flex items-center gap-4 w-[30%]">
-                <div className="w-14 h-14 bg-stone-800 rounded overflow-hidden flex items-center justify-center relative">
-                    <Disc className="w-8 h-8 text-stone-600" />
+                <div className="w-14 h-14 bg-stone-800 rounded overflow-hidden flex items-center justify-center relative flex-shrink-0">
+                    {currentSong.imageUrl ? (
+                        <img src={currentSong.imageUrl} alt={currentSong.title} className="w-full h-full object-cover" />
+                    ) : (
+                        <Disc className="w-8 h-8 text-stone-600" />
+                    )}
                     {isCrossfading && (
                         <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
                             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />

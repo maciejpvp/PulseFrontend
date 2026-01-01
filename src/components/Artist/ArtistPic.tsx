@@ -4,13 +4,14 @@ import { User } from "lucide-react";
 
 type Props = {
     url: Maybe<string> | undefined
+    size?: number
 }
 
-export const ArtistPic = ({ url }: Props) => {
+export const ArtistPic = ({ url, size = 48 }: Props) => {
     const [imageLoadingError, setImageLoadingError] = useState(false);
 
     return (
-        <div className="w-48 h-48 rounded-full bg-stone-900 flex items-center justify-center">
+        <div className={`w-${size} h-${size} rounded-full bg-stone-900 flex items-center justify-center`}>
             {url && !imageLoadingError ? (
                 <img
                     src={url}

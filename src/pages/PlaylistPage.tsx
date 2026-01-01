@@ -34,7 +34,7 @@ export const PlaylistPage = () => {
                     contextType: "PLAYLIST"
                 }
             });
-            playSong(song, url, playlist.id, "PLAYLIST", songs);
+            playSong(song, url, playlist.id, "PLAYLIST", playlist.name, songs);
         } catch (error) {
             console.error("Failed to play song:", error);
         }
