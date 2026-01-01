@@ -37,12 +37,17 @@ export const CreateModal = () => {
         }
     }
 
+    const handleClose = () => {
+        setOpen(false)
+        setSelectedType(entityTypes[0].type)
+    }
+
     // Check on which path user is to determinate default selected type and pre-configure values
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="rounded-full w-10 h-10"><Plus /></Button>
+                <Button variant="outline" className="rounded-full w-10 h-10 bg-stone-900"><Plus /></Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
@@ -51,7 +56,7 @@ export const CreateModal = () => {
                 <EntityTypeSelect selectedType={selectedType} setSelectedType={setSelectedType} />
                 {(() => {
                     const TypeComponent = entityTypes.find((type) => type.type === selectedType)?.component;
-                    return TypeComponent ? <TypeComponent artistId={pageData?.artistId} albumId={pageData?.albumId} /> : null;
+                    return TypeComponent ? <TypeComponent onClose={handleClose} artistId={pageData?.artistId} albumId={pageData?.albumId} /> : null;
                 })()}
                 <DialogFooter className="sm:justify-start">
                     <DialogClose asChild>

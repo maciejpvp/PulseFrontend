@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button";
 import { ImagePlus, Loader2, X } from "lucide-react";
 import { useNavigate } from "react-router";
 
-export const CreatePlaylist = () => {
+interface CreatePlaylistProps {
+    onClose: () => void;
+}
+
+export const CreatePlaylist = ({ onClose }: CreatePlaylistProps) => {
     const { createPlaylist, isLoading, error } = useCreatePlaylist();
     const navigate = useNavigate();
 
@@ -54,6 +58,7 @@ export const CreatePlaylist = () => {
             setName("");
             setSelectedFile(undefined);
             if (fileInputRef.current) fileInputRef.current.value = "";
+            onClose();
 
         } catch (err) {
             console.error("Upload failed", err);

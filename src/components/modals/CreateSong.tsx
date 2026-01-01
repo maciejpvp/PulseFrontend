@@ -8,9 +8,10 @@ import { Music, Loader2, X, FileAudio } from "lucide-react";
 interface CreateSongProps {
     artistId?: string;
     albumId?: string;
+    onClose: () => void;
 }
 
-export const CreateSong = ({ artistId: initialArtistId, albumId: initialAlbumId }: CreateSongProps) => {
+export const CreateSong = ({ artistId: initialArtistId, albumId: initialAlbumId, onClose }: CreateSongProps) => {
     const { createSong, isLoading, error } = useCreateSong();
 
     const [title, setTitle] = useState("");
@@ -25,6 +26,14 @@ export const CreateSong = ({ artistId: initialArtistId, albumId: initialAlbumId 
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             setSelectedFile(file);
+
+            // Extract title from filename if not already set
+            if (!title) {
+                const fileName = file.name;
+                const lastDotIndex = fileName.lastIndexOf('.');
+                const extractedTitle = lastDotIndex !== -1 ? fileName.substring(0, lastDotIndex) : fileName;
+                setTitle(extractedTitle);
+            }
 
             // Extract duration
             const audio = new Audio();
@@ -63,7 +72,7 @@ export const CreateSong = ({ artistId: initialArtistId, albumId: initialAlbumId 
             setSelectedFile(undefined);
             setDuration(0);
             if (fileInputRef.current) fileInputRef.current.value = "";
-
+            onClose();
             // Optional: navigate or show success message
             // navigate(`/artist/${artistId}`); 
 

@@ -17,10 +17,10 @@ export const RootLayout = () => {
                         <Outlet />
                     </main>
                 </div>
+                <div className="fixed bottom-4 right-4 z-100">
+                    <CreateModal />
+                </div>
                 <PlayerBar />
-            </div>
-            <div className="fixed bottom-4 right-4">
-                <CreateModal />
             </div>
         </ThemeProvider>
     )

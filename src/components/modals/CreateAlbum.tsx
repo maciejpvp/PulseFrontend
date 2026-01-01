@@ -8,9 +8,10 @@ import { useNavigate } from "react-router";
 
 interface CreateAlbumProps {
     artistId?: string;
+    onClose: () => void;
 }
 
-export const CreateAlbum = ({ artistId: initialArtistId }: CreateAlbumProps) => {
+export const CreateAlbum = ({ artistId: initialArtistId, onClose }: CreateAlbumProps) => {
     const { createAlbum, isLoading, error } = useCreateAlbum();
     const navigate = useNavigate();
 
@@ -61,6 +62,7 @@ export const CreateAlbum = ({ artistId: initialArtistId }: CreateAlbumProps) => 
             setArtistId("");
             setSelectedFile(undefined);
             if (fileInputRef.current) fileInputRef.current.value = "";
+            onClose();
 
         } catch (err) {
             console.error("Upload failed", err);

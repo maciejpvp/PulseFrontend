@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button";
 import { ImagePlus, Loader2, X } from "lucide-react";
 import { useNavigate } from "react-router";
 
-export const CreateArtist = () => {
+interface CreateArtistProps {
+    onClose: () => void;
+}
+
+export const CreateArtist = ({ onClose }: CreateArtistProps) => {
     const { createArtist, isLoading, error } = useCreateArtist();
 
     const navigate = useNavigate();
@@ -61,6 +65,7 @@ export const CreateArtist = () => {
             setName("");
             setSelectedFile(undefined);
             if (fileInputRef.current) fileInputRef.current.value = "";
+            onClose();
 
         } catch (err) {
             console.error("Upload failed", err);
