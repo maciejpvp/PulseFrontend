@@ -54,7 +54,7 @@ export const NowPlayingView = ({ onClose }: { onClose: () => void }) => {
                     {currentSong.title}
                 </h2>
                 <p className="text-stone-400 hover:text-white hover:underline cursor-pointer transition-colors text-base">
-                    {currentSong.artist.name}
+                    {currentSong.artist?.name}
                 </p>
             </div>
         </div>

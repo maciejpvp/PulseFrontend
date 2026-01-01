@@ -17,6 +17,7 @@ export const AlbumPage = () => {
     const { albumId, artistId } = useParams<{ albumId: string; artistId: string }>();
     const { album, isLoading, isError } = useAlbum(albumId ?? "", artistId ?? "");
     const playSong = usePlayerStore((state) => state.playSong);
+    const currentSong = usePlayerStore((state) => state.currentSong);
     const { playSongMutation } = useSongPlay();
     const mainColor = useImageColor(album?.imageUrl);
 
@@ -24,7 +25,10 @@ export const AlbumPage = () => {
     if (isLoading) return <div className="p-8 text-stone-400">Loading...</div>;
     if (isError || !album) return <ErrorPage />;
 
-    const songs = album.songs.edges.map((edge) => edge.node);
+    const songs = album.songs.edges.map((edge) => ({
+        ...edge.node,
+        artist: album.artist
+    }));
 
     const handleNavigateToArtist = () => {
         navigate(`/artist/${artistId}`);
@@ -50,7 +54,7 @@ export const AlbumPage = () => {
     console.log(album);
 
     return (
-        <div className="w-full h-full overflow-y-auto relative">
+        <div className="w-full h-full overflow-y-auto relative custom-scrollbar">
             <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
@@ -89,7 +93,8 @@ export const AlbumPage = () => {
                             <div
                                 key={song.id}
                                 onClick={() => handlePlaySong(song)}
-                                className="grid grid-cols-[16px_1fr_auto] gap-4 px-4 py-3 hover:bg-white/5 rounded-md group transition-colors items-center cursor-pointer"
+                                className={`grid grid-cols-[16px_1fr_auto] gap-4 px-4 py-3 hover:bg-white/5 rounded-md group transition-colors items-center cursor-pointer ${song.id === currentSong?.id ? "bg-gradient-to-t from-green-500/20 from-0% to-60% to-transparent" : ""
+                                    }`}
                             >
                                 <div className="flex items-center justify-center">
                                     <span className="text-stone-500 group-hover:hidden text-sm font-medium tabular-nums">

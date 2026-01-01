@@ -14,6 +14,7 @@ export const PlaylistPage = () => {
     const { playlistId } = useParams<{ playlistId: string }>();
     const { playlist, isLoading, isError } = usePlaylist(playlistId ?? "");
     const playSong = usePlayerStore((state) => state.playSong);
+    const currentSong = usePlayerStore((state) => state.currentSong);
     const { playSongMutation } = useSongPlay();
     const mainColor = useImageColor(playlist?.imageUrl);
 
@@ -41,7 +42,7 @@ export const PlaylistPage = () => {
     };
 
     return (
-        <div className="w-full h-full overflow-y-auto text-stone-200 relative">
+        <div className="w-full h-full overflow-y-auto text-stone-200 relative custom-scrollbar">
             <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
@@ -79,7 +80,11 @@ export const PlaylistPage = () => {
 
                     <div className="flex flex-col">
                         {songs.map((song, index) => (
-                            <div key={song.id} className="flex items-center gap-4 group">
+                            <div
+                                key={song.id}
+                                className={`flex items-center gap-4 group rounded-md transition-colors ${song.id === currentSong?.id ? "bg-gradient-to-t from-green-500/20 to-transparent" : ""
+                                    }`}
+                            >
                                 <span className="text-stone-500 group-hover:text-stone-300 text-sm font-medium tabular-nums w-4 text-center">
                                     {index + 1}
                                 </span>

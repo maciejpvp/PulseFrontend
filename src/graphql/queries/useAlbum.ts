@@ -31,7 +31,7 @@ album(input: $input) {
         artist {
           id
           name
-          imageUrl 
+          imageUrl
         }
       }
     }
