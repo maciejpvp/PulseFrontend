@@ -12,7 +12,7 @@ import { BookmarkButton } from "@/components/BookmarkButton";
 export const PlaylistPage = () => {
     const { playlistId } = useParams<{ playlistId: string }>();
     const { playlist, isLoading, isError } = usePlaylist(playlistId ?? "");
-    const { playSong } = usePlayerStore();
+    const playSong = usePlayerStore((state) => state.playSong);
     const { playSongMutation } = useSongPlay();
 
     if (isLoading) return <div className="p-8 text-stone-400">Loading...</div>;

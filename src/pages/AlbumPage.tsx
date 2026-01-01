@@ -14,7 +14,7 @@ export const AlbumPage = () => {
     const navigate = useNavigate();
     const { albumId, artistId } = useParams<{ albumId: string; artistId: string }>();
     const { album, isLoading, isError } = useAlbum(albumId ?? "", artistId ?? "");
-    const { playSong } = usePlayerStore();
+    const playSong = usePlayerStore((state) => state.playSong);
     const { playSongMutation } = useSongPlay();
 
 

@@ -1,4 +1,5 @@
 import { usePlayerStore } from "@/store/player.store";
+import { createPortal } from "react-dom";
 import { formatTime } from "@/lib/formatTime";
 import {
     Play,
@@ -38,7 +39,7 @@ export const PlayerBar = () => {
         setVolume(Number(e.target.value));
     };
 
-    return (
+    return createPortal(
         <div className="fixed bottom-0 left-0 right-0 h-24 bg-black border-t border-white/10 px-4 flex items-center justify-between z-50">
             {/* Song Info */}
             <div className="flex items-center gap-4 w-[30%]">
@@ -117,6 +118,7 @@ export const PlayerBar = () => {
                     className="w-24 h-1 bg-stone-600 rounded-lg appearance-none cursor-pointer accent-white hover:accent-green-500"
                 />
             </div>
-        </div>
+        </div>,
+        document.getElementById("player-root")!
     );
 };
