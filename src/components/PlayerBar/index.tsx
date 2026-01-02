@@ -14,7 +14,7 @@ import {
     Disc
 } from "lucide-react";
 import { useSongPlay } from "@/graphql/mutations/useSongPlay";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export const PlayerBar = () => {
     const {
@@ -38,6 +38,8 @@ export const PlayerBar = () => {
         isCrossfading
     } = usePlayerStore();
     const { playSongMutation } = useSongPlay();
+    const progressBarRef = useRef<HTMLDivElement>(null);
+    const knobRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const audio = usePlayerStore.getState().audio;
@@ -78,18 +80,70 @@ export const PlayerBar = () => {
         playSongMutation
     ]);
 
-    if (!currentSong) return null;
+    useEffect(() => {
+        let animationFrameId: number;
 
-    const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setProgress(Number(e.target.value));
-    };
+        const updateProgress = () => {
+            const audio = usePlayerStore.getState().audio;
+            if (audio && progressBarRef.current && !isCrossfading) {
+                const currentProgress = audio.currentTime;
+                const currentDuration = audio.duration;
+                if (currentDuration > 0) {
+                    const percentage = (currentProgress / currentDuration) * 100;
+                    progressBarRef.current.style.transform = `scaleX(${percentage / 100})`;
+                    if (knobRef.current) {
+                        knobRef.current.style.left = `${percentage}%`;
+                    }
+                }
+            }
+            animationFrameId = requestAnimationFrame(updateProgress);
+        };
+
+        if (isPlaying && !isCrossfading) {
+            animationFrameId = requestAnimationFrame(updateProgress);
+        }
+
+        return () => {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+        };
+    }, [isPlaying, isCrossfading]);
+
+    if (!currentSong) return null;
 
     const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setVolume(Number(e.target.value));
     };
 
     return createPortal(
-        <div className="fixed bottom-0 left-0 right-0 h-24 bg-black border-t border-white/10 px-4 flex items-center justify-between z-50">
+        <div className="fixed bottom-0 left-0 right-0 h-24 bg-black px-4 flex items-center justify-between z-50 group/player">
+            {/* Progress Bar Hit Area */}
+            <div
+                className="absolute top-[-10px] left-0 right-0 h-6 cursor-pointer group z-10"
+                onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const percentage = x / rect.width;
+                    setProgress(percentage * duration);
+                }}
+            >
+                {/* Visual Bar Container */}
+                <div className="absolute top-[10px] left-0 right-0 h-[2px] bg-white/10 transition-[height,top] group-hover:h-1.5 group-hover:top-[8px]">
+                    <div
+                        ref={progressBarRef}
+                        className="h-full bg-green-500 origin-left will-change-transform"
+                        style={{ transform: `scaleX(${(progress / duration) || 0})` }}
+                    />
+                </div>
+                {/* Knob */}
+                <div
+                    ref={knobRef}
+                    className="absolute top-[11px] -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg pointer-events-none"
+                    style={{ left: `${(progress / duration) * 100}%` }}
+                />
+            </div>
+
             {/* Song Info */}
             <div className="flex items-center gap-4 w-[30%]">
                 <div className="w-14 h-14 bg-stone-800 rounded overflow-hidden flex items-center justify-center relative flex-shrink-0">
@@ -149,26 +203,27 @@ export const PlayerBar = () => {
                     </button>
                 </div>
 
-                <div className="flex items-center gap-2 w-full">
-                    <span className="text-xs text-stone-400 w-10 text-right">
+                <div className="flex items-center gap-2 w-full justify-center">
+                    <span className="text-[10px] text-stone-400">
                         {formatTime(Math.floor(progress))}
                     </span>
-                    <input
-                        type="range"
-                        min={0}
-                        max={duration || 0}
-                        value={progress}
-                        onChange={handleProgressChange}
-                        className="flex-1 h-1 bg-stone-600 rounded-lg appearance-none cursor-pointer accent-white hover:accent-green-500"
-                    />
-                    <span className="text-xs text-stone-400 w-10">
+                    <span className="text-[10px] text-stone-600">/</span>
+                    <span className="text-[10px] text-stone-400">
                         {formatTime(Math.floor(duration))}
                     </span>
                 </div>
             </div>
 
             {/* Volume */}
-            <div className="flex items-center justify-end gap-3 w-[30%]">
+            <div
+                className="flex items-center justify-end gap-3 w-[30%]"
+                onWheel={(e) => {
+                    e.preventDefault();
+                    const delta = e.deltaY > 0 ? -0.05 : 0.05;
+                    const newVolume = Math.max(0, Math.min(1, volume + delta));
+                    setVolume(newVolume);
+                }}
+            >
                 <button className="text-stone-400 hover:text-white transition-colors">
                     {volume === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                 </button>
