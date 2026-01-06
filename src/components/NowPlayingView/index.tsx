@@ -11,7 +11,7 @@ export const NowPlayingView = ({ onClose }: { onClose: () => void }) => {
     const originText = contextName || "NOW PLAYING";
 
     return (
-        <div className="w-[350px] h-full flex flex-col bg-[#121212] rounded-lg overflow-hidden relative border border-white/5">
+        <div className="hidden md:block w-[350px] h-full flex flex-col bg-[#121212] rounded-lg overflow-hidden relative border border-white/5">
             {/* Gradient Background */}
             <div
                 className="absolute inset-0 opacity-40 pointer-events-none"

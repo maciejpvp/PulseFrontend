@@ -1,17 +1,22 @@
 import { useState } from "react";
 import type { Maybe } from "@/graphql/types";
 import { User } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type Props = {
     url: Maybe<string> | undefined
     size?: number
+    className?: string
 }
 
-export const ArtistPic = ({ url, size = 48 }: Props) => {
+export const ArtistPic = ({ url, size = 48, className }: Props) => {
     const [imageLoadingError, setImageLoadingError] = useState(false);
 
     return (
-        <div className={`w-${size} h-${size} rounded-full bg-stone-900 flex items-center justify-center`}>
+        <div className={cn(
+            `w-${size} h-${size} rounded-full bg-stone-900 flex items-center justify-center shrink-0`,
+            className
+        )}>
             {url && !imageLoadingError ? (
                 <img
                     src={url}

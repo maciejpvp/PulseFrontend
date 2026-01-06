@@ -26,21 +26,26 @@ export const ArtistPage = () => {
                 }}
             />
             <div className="relative z-10">
-                <div className="flex flex-row items-center gap-8 p-8">
-                    <ArtistPic key={artistId} url={artist.imageUrl} size={64} />
-                    <div className="flex flex-col pb-2">
-                        <span className="text-sm font-medium uppercase tracking-wider text-stone-400">Artist</span>
-                        <h1 className="text-6xl font-black text-white tracking-tight">{artist.name}</h1>
-                        <div className="flex items-center gap-4 mt-4">
+                <div className="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8 p-4 md:p-8 text-center md:text-left">
+                    <ArtistPic
+                        key={artistId}
+                        url={artist.imageUrl}
+                        size={64}
+                        className="w-32 h-32 md:w-64 md:h-64 shadow-lg"
+                    />
+                    <div className="flex flex-col pb-2 w-full md:w-auto">
+                        <span className="text-xs md:text-sm font-medium uppercase tracking-wider text-stone-400 mb-2 md:mb-0">Artist</span>
+                        <h1 className="text-3xl md:text-6xl font-black text-white tracking-tight mb-4 md:mb-0">{artist.name}</h1>
+                        <div className="flex items-center justify-center md:justify-start gap-4 mt-2 md:mt-4">
                             <BookmarkButton itemId={artist.id} itemType="ARTIST" artistId={artist.id} defaultState={artist.isBookmarked} />
-                            <span className="text-stone-400 font-medium">{albums.length} albums</span>
+                            <span className="text-stone-400 font-medium text-sm md:text-base">{albums.length} {albums.length === 1 ? "album" : "albums"}</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="px-8 pb-8">
-                    <h2 className="text-2xl font-bold text-white mb-6">Albums</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+                <div className="px-4 md:px-8 pb-8">
+                    <h2 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">Albums</h2>
+                    <div className="flex flex-wrap gap-4 md:gap-6">
                         {albums.map((album) => (
                             <CollectionView key={album.id} type="album" album={album} artistId={artist.id} />
                         ))}

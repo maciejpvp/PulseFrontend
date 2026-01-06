@@ -12,6 +12,7 @@ import { usePlayerStore } from "@/store/player.store";
 export const RootLayout = () => {
     const { currentSong } = usePlayerStore();
     const [isNowPlayingVisible, setIsNowPlayingVisible] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // Reset visibility when song changes
     useEffect(() => {
@@ -26,9 +27,9 @@ export const RootLayout = () => {
     return (
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
             <div className="h-screen flex flex-col overflow-hidden bg-black text-white">
-                <Navbar />
-                <div className="flex flex-row flex-1 overflow-hidden pt-2 gap-2 px-2">
-                    <Sidebar />
+                <Navbar onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+                <div className="flex flex-row flex-1 overflow-hidden pt-2 gap-2 px-2 relative">
+                    <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
                     <main className="flex-1 overflow-y-auto pb-28 rounded-lg bg-[#121212]">
                         <Outlet />
                     </main>

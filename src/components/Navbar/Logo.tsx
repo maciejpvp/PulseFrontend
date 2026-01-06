@@ -9,7 +9,7 @@ export const Logo = ({ size = 3 }: Props) => {
         <img
             src="/Logo.png"
             alt="Pulse Logo"
-            className={cn("w-auto")}
+            className={cn("w-auto max-w-full object-contain")}
             style={{ height: `${size}rem` }}
         />
     );

@@ -1,14 +1,20 @@
 import { Input } from "@/components/ui/input";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, X } from "lucide-react";
 import { Kbd } from "@/components/ui/kbd";
 import { useState, useEffect, useRef } from "react";
 import { useSearch } from "@/graphql/queries/useSearch";
 import { useNavigate } from "react-router";
 import type { BookmarkItem } from "@/graphql/types";
+import { cn } from "@/lib/utils";
 
 type SearchType = "ARTIST" | "SONG" | "ALBUM" | "PLAYLIST";
 
-export const SearchBar = () => {
+type Props = {
+    isExpanded: boolean;
+    onToggle: (expanded: boolean) => void;
+}
+
+export const SearchBar = ({ isExpanded, onToggle }: Props) => {
     const [query, setQuery] = useState("");
     const [debouncedQuery, setDebouncedQuery] = useState("");
     const [type, setType] = useState<SearchType>("ARTIST");
@@ -30,6 +36,9 @@ export const SearchBar = () => {
         const handleClickOutside = (event: MouseEvent) => {
             if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
                 setShowResults(false);
+                if (window.innerWidth < 768) {
+                    onToggle(false);
+                }
             }
         };
 
@@ -37,11 +46,12 @@ export const SearchBar = () => {
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, []);
+    }, [onToggle]);
 
     const handleSelectResult = (item: BookmarkItem) => {
         setShowResults(false);
         setQuery(""); // Optional: clear search after selection
+        onToggle(false);
 
         switch (item.__typename) {
             case "ArtistPreview":
@@ -63,8 +73,28 @@ export const SearchBar = () => {
     };
 
     return (
-        <div ref={searchRef} className="relative group flex items-center gap-2">
-            <div className="relative flex-1 flex items-center">
+        <div
+            ref={searchRef}
+            className={cn(
+                "relative group flex items-center gap-2 transition-all duration-300",
+                isExpanded ? "flex-1" : "flex-initial"
+            )}
+        >
+            {/* Mobile Search Icon (when collapsed) */}
+            {!isExpanded && (
+                <button
+                    onClick={() => onToggle(true)}
+                    className="p-2 hover:bg-white/10 rounded-full md:hidden"
+                    aria-label="Open Search"
+                >
+                    <Search size={24} />
+                </button>
+            )}
+
+            <div className={cn(
+                "relative flex-1 items-center",
+                isExpanded ? "flex" : "hidden md:flex"
+            )}>
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
 
                 <div className="absolute left-10 top-1/2 -translate-y-1/2 z-20">
@@ -89,15 +119,31 @@ export const SearchBar = () => {
                     }}
                     onFocus={() => setShowResults(true)}
                     placeholder="Search..."
-                    className="h-12 w-96 pl-32 pr-20 bg-secondary/50 border-transparent focus:border-primary/20 transition-all"
+                    className={cn(
+                        "h-12 w-full pl-32 pr-20 bg-secondary/50 border-transparent focus:border-primary/20 transition-all",
+                        "md:w-96"
+                    )}
                 />
 
                 <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100 hidden md:block">
                     <Kbd>Ctrl + K</Kbd>
                 </div>
 
+                {/* Mobile Close Button */}
+                {isExpanded && (
+                    <button
+                        onClick={() => onToggle(false)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-white/10 rounded-full md:hidden"
+                    >
+                        <X size={20} />
+                    </button>
+                )}
+
                 {isLoading && (
-                    <div className="absolute right-12 top-1/2 -translate-y-1/2">
+                    <div className={cn(
+                        "absolute top-1/2 -translate-y-1/2",
+                        isExpanded ? "right-12" : "right-12"
+                    )}>
                         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                     </div>
                 )}

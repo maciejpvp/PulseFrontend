@@ -1,18 +1,21 @@
 import { useState } from "react";
 import { Disc } from "lucide-react";
 import type { Maybe } from "@/graphql/types";
+import { cn } from "@/lib/utils";
 
 type Props = {
     imageUrl: Maybe<string> | undefined;
+    className?: string;
 };
 
-export const AlbumCover = ({ imageUrl }: Props) => {
+export const AlbumCover = ({ imageUrl, className }: Props) => {
     const [imageLoadingError, setImageLoadingError] = useState(false);
 
-    console.log(imageLoadingError);
-
     return (
-        <div className="w-64 h-64 bg-stone-800 shadow-2xl flex items-center justify-center rounded-sm shrink-0">
+        <div className={cn(
+            "bg-stone-800 shadow-2xl flex items-center justify-center rounded-sm shrink-0",
+            className
+        )}>
             {imageUrl && !imageLoadingError ? (
                 <img
                     src={imageUrl}
@@ -24,7 +27,7 @@ export const AlbumCover = ({ imageUrl }: Props) => {
                     }}
                 />
             ) : (
-                <Disc className="w-32 h-32 text-stone-600" />
+                <Disc className="w-1/2 h-1/2 text-stone-600" />
             )}
         </div>
     );

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useSongPlay } from "@/graphql/mutations/useSongPlay";
 import { useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 
 export const PlayerBar = () => {
     const {
@@ -117,10 +118,19 @@ export const PlayerBar = () => {
     };
 
     return createPortal(
-        <div className="fixed bottom-0 left-0 right-0 h-24 bg-black px-4 flex items-center justify-between z-50 group/player">
+        <div className={cn(
+            "fixed z-50 group/player transition-all duration-300",
+            // Mobile: Floating liquid glass
+            "bottom-8 left-4 right-4 h-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl px-3 flex items-center justify-between shadow-2xl",
+            // Desktop: Full width solid black
+            "md:bottom-0 md:left-0 md:right-0 md:h-24 md:bg-black md:border-none md:rounded-none md:px-4"
+        )}>
             {/* Progress Bar Hit Area */}
             <div
-                className="absolute top-[-10px] left-0 right-0 h-6 cursor-pointer group z-10"
+                className={cn(
+                    "absolute left-0 right-0 cursor-pointer group z-10",
+                    "top-0 h-1 md:top-[-10px] md:h-6"
+                )}
                 onClick={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
                     const x = e.clientX - rect.left;
@@ -129,28 +139,31 @@ export const PlayerBar = () => {
                 }}
             >
                 {/* Visual Bar Container */}
-                <div className="absolute top-[10px] left-0 right-0 h-[2px] bg-white/10 transition-[height,top] group-hover:h-1.5 group-hover:top-[8px]">
+                <div className={cn(
+                    "absolute left-1 right-1 md:left-0 md:right-0 bg-white/10 transition-[height,top]",
+                    "top-[0.4px] h-full rounded-t-xl md:rounded-none md:top-[10px] md:h-[2px] md:group-hover:h-1.5 md:group-hover:top-[8px]"
+                )}>
                     <div
                         ref={progressBarRef}
-                        className="h-full bg-green-500 origin-left will-change-transform"
-                        style={{ transform: `scaleX(${(progress / duration) || 0})` }}
+                        className="h-full bg-green-500 origin-left will-change-transform rounded-t-xl md:rounded-none"
+                        style={{ transform: `scaleX(${(progress / duration) || 0}) ` }}
                     />
                 </div>
-                {/* Knob */}
+                {/* Knob - Only on Desktop */}
                 <div
                     ref={knobRef}
-                    className="absolute top-[11px] -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg pointer-events-none"
+                    className="absolute top-[11px] -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg pointer-events-none hidden md:block"
                     style={{ left: `${(progress / duration) * 100}%` }}
                 />
             </div>
 
             {/* Song Info */}
-            <div className="flex items-center gap-4 w-[30%]">
-                <div className="w-14 h-14 bg-stone-800 rounded overflow-hidden flex items-center justify-center relative flex-shrink-0">
+            <div className="flex items-center gap-3 md:gap-4 w-auto md:w-[30%] min-w-0">
+                <div className="w-10 h-10 md:w-14 md:h-14 bg-stone-800 rounded overflow-hidden flex items-center justify-center relative flex-shrink-0">
                     {currentSong.imageUrl ? (
                         <img src={currentSong.imageUrl} alt={currentSong.title} className="w-full h-full object-cover" />
                     ) : (
-                        <Disc className="w-8 h-8 text-stone-600" />
+                        <Disc className="w-6 h-6 md:w-8 md:h-8 text-stone-600" />
                     )}
                     {isCrossfading && (
                         <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
@@ -159,34 +172,37 @@ export const PlayerBar = () => {
                     )}
                 </div>
                 <div className="flex flex-col overflow-hidden">
-                    <span className="text-white font-medium truncate">{currentSong.title}</span>
-                    <span className="text-stone-400 text-sm truncate">{currentSong.artist.name}</span>
+                    <span className="text-white font-medium truncate text-sm md:text-base">{currentSong.title}</span>
+                    <span className="text-stone-400 text-xs md:text-sm truncate">{currentSong.artist.name}</span>
                 </div>
             </div>
 
             {/* Controls */}
-            <div className="flex flex-col items-center gap-2 w-[40%] max-w-[600px]">
-                <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4 md:flex-col md:gap-2 md:w-[40%] md:max-w-[600px]">
+                <div className="flex items-center gap-4 md:gap-6">
                     <button
                         onClick={toggleShuffle}
-                        className={`transition-colors ${isShuffled ? "text-green-500 hover:text-green-400" : "text-stone-400 hover:text-white"}`}
+                        className={cn(
+                            "transition-colors hidden md:block",
+                            isShuffled ? "text-green-500 hover:text-green-400" : "text-stone-400 hover:text-white"
+                        )}
                     >
                         <Shuffle className="w-5 h-5" />
                     </button>
                     <button
                         onClick={() => previousSong(playSongMutation)}
-                        className="text-stone-400 hover:text-white transition-colors"
+                        className="text-stone-400 hover:text-white transition-colors "
                     >
                         <SkipBack className="w-6 h-6 fill-current" />
                     </button>
                     <button
                         onClick={togglePlay}
-                        className="w-8 h-8 flex items-center justify-center bg-white rounded-full hover:scale-105 transition-transform"
+                        className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-white rounded-full hover:scale-105 transition-transform shrink-0"
                     >
                         {isPlaying ? (
-                            <Pause className="w-5 h-5 text-black fill-current" />
+                            <Pause className="w-5 h-5 md:w-6 md:h-6 text-black fill-current" />
                         ) : (
-                            <Play className="w-5 h-5 text-black fill-current ml-0.5" />
+                            <Play className="w-5 h-5 md:w-6 md:h-6 text-black fill-current ml-0.5" />
                         )}
                     </button>
                     <button
@@ -197,13 +213,16 @@ export const PlayerBar = () => {
                     </button>
                     <button
                         onClick={toggleRepeat}
-                        className={`transition-colors ${repeatMode !== "none" ? "text-green-500 hover:text-green-400" : "text-stone-400 hover:text-white"}`}
+                        className={cn(
+                            "transition-colors hidden md:block",
+                            repeatMode !== "none" ? "text-green-500 hover:text-green-400" : "text-stone-400 hover:text-white"
+                        )}
                     >
                         {repeatMode === "one" ? <Repeat1 className="w-5 h-5" /> : <Repeat className="w-5 h-5" />}
                     </button>
                 </div>
 
-                <div className="flex items-center gap-2 w-full justify-center">
+                <div className="hidden md:flex items-center gap-2 w-full justify-center">
                     <span className="text-[10px] text-stone-400">
                         {formatTime(Math.floor(progress))}
                     </span>
@@ -214,9 +233,9 @@ export const PlayerBar = () => {
                 </div>
             </div>
 
-            {/* Volume */}
+            {/* Volume - Desktop Only */}
             <div
-                className="flex items-center justify-end gap-3 w-[30%]"
+                className="hidden md:flex items-center justify-end gap-3 w-[30%]"
                 onWheel={(e) => {
                     e.preventDefault();
                     const delta = e.deltaY > 0 ? -0.05 : 0.05;
