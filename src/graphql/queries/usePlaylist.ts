@@ -16,6 +16,7 @@ query GetPlaylist($playlistId: ID!) {
           id
           title
           duration
+          imageUrl
           artist {
             id
             name

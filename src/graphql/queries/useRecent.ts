@@ -14,6 +14,7 @@ const GET_RECENTLY_PLAYED = gql`
         id
         artistId
         title
+        imageUrl
       }
       ... on AlbumPreview {
         id
@@ -32,6 +33,7 @@ const GET_RECENTLY_PLAYED = gql`
       ... on PlaylistPreview {
         id
         name
+        imageUrl
       }
     }
   }

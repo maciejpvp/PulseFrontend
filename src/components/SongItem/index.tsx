@@ -17,7 +17,15 @@ export const SongItem = ({ song, onClick }: SongItemProps) => {
         >
             <div className="relative w-12 h-12 shrink-0 rounded overflow-hidden bg-stone-800">
                 <div className="w-full h-full flex items-center justify-center bg-stone-800 text-stone-600">
-                    <Disc className="w-6 h-6" />
+                    {song.imageUrl ? (
+                        <img
+                            src={song.imageUrl}
+                            alt={song.title}
+                            className="w-full h-full object-cover"
+                        />
+                    ) : (
+                        <Disc className="w-6 h-6" />
+                    )}
                 </div>
             </div>
             <div className="flex flex-row justify-between items-center overflow-hidden w-full max-w-2/3">
