@@ -19,6 +19,7 @@ export const AlbumCover = ({ imageUrl, className }: Props) => {
             {imageUrl && !imageLoadingError ? (
                 <img
                     src={imageUrl}
+                    crossOrigin="anonymous"
                     alt="Album"
                     className="w-full h-full object-cover rounded-sm"
                     onError={() => {

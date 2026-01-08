@@ -103,6 +103,7 @@ export const CreateArtist = ({ onClose }: CreateArtistProps) => {
                         <>
                             <img
                                 src={previewUrl}
+                                crossOrigin="anonymous"
                                 alt="Preview"
                                 className="w-full h-full object-cover rounded-full shadow-xl"
                             />

@@ -114,7 +114,7 @@ export const CollectionView = (props: Props) => {
                 isList && "w-12 h-12"
             )}>
                 {imageUrl ? (
-                    <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
+                    <img src={imageUrl} crossOrigin="anonymous" alt={name} className="w-full h-full object-cover" />
                 ) : (
                     <Icon className={cn(
                         "text-stone-600 group-hover:text-stone-500 transition-colors",

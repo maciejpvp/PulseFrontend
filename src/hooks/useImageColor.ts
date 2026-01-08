@@ -12,7 +12,7 @@ export const useImageColor = (imageUrl: string | null | undefined) => {
             }
 
             const fac = new FastAverageColor();
-            fac.getColorAsync(imageUrl, { crossOrigin: 'anonymous' })
+            fac.getColorAsync(`${imageUrl}`, { crossOrigin: 'anonymous' })
                 .then((res) => {
                     setColor(res.rgba);
                 })

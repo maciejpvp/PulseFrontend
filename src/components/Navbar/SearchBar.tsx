@@ -168,6 +168,7 @@ export const SearchBar = ({ isExpanded, onToggle }: Props) => {
                                                 {imageUrl ? (
                                                     <img
                                                         src={imageUrl}
+                                                        crossOrigin="anonymous"
                                                         alt={name}
                                                         className="w-10 h-10 rounded object-cover bg-secondary"
                                                     />

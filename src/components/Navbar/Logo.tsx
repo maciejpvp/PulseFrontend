@@ -8,6 +8,7 @@ export const Logo = ({ size = 3 }: Props) => {
     return (
         <img
             src="/Logo.png"
+            crossOrigin="anonymous"
             alt="Pulse Logo"
             className={cn("w-auto max-w-full object-contain")}
             style={{ height: `${size}rem` }}

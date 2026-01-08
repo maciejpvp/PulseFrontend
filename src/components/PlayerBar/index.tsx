@@ -161,7 +161,7 @@ export const PlayerBar = () => {
             <div className="flex items-center gap-3 md:gap-4 w-auto md:w-[30%] min-w-0">
                 <div className="w-10 h-10 md:w-14 md:h-14 bg-stone-800 rounded overflow-hidden flex items-center justify-center relative flex-shrink-0">
                     {currentSong.imageUrl ? (
-                        <img src={currentSong.imageUrl} alt={currentSong.title} className="w-full h-full object-cover" />
+                        <img src={currentSong.imageUrl} crossOrigin="anonymous" alt={currentSong.title} className="w-full h-full object-cover" />
                     ) : (
                         <Disc className="w-6 h-6 md:w-8 md:h-8 text-stone-600" />
                     )}

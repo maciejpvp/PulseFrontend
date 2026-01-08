@@ -20,6 +20,7 @@ export const SongItem = ({ song, onClick }: SongItemProps) => {
                     {song.imageUrl ? (
                         <img
                             src={song.imageUrl}
+                            crossOrigin="anonymous"
                             alt={song.title}
                             className="w-full h-full object-cover"
                         />

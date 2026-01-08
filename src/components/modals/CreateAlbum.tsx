@@ -115,6 +115,7 @@ export const CreateAlbum = ({ artistId: initialArtistId, onClose }: CreateAlbumP
                         <>
                             <img
                                 src={previewUrl}
+                                crossOrigin="anonymous"
                                 alt="Preview"
                                 className="w-full h-full object-cover rounded-md shadow-xl"
                             />

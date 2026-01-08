@@ -96,6 +96,7 @@ export const CreatePlaylist = ({ onClose }: CreatePlaylistProps) => {
                         <>
                             <img
                                 src={previewUrl}
+                                crossOrigin="anonymous"
                                 alt="Preview"
                                 className="w-full h-full object-cover rounded-md shadow-xl"
                             />

@@ -20,6 +20,7 @@ export const ArtistPic = ({ url, size = 48, className }: Props) => {
             {url && !imageLoadingError ? (
                 <img
                     src={url}
+                    crossOrigin="anonymous"
                     alt=""
                     className="w-full h-full rounded-full object-cover"
                     onError={() => {

@@ -39,6 +39,7 @@ export const NowPlayingView = ({ onClose }: { onClose: () => void }) => {
                     {currentSong.imageUrl ? (
                         <img
                             src={currentSong.imageUrl}
+                            crossOrigin="anonymous"
                             alt={currentSong.title}
                             className="w-full h-full object-cover"
                         />

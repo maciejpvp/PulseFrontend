@@ -14,7 +14,7 @@ export const NavbarItem = ({ label, subLabel, icon, imageUrl, onClick, to }: Pro
         <>
             <div className="flex-shrink-0 w-7 h-7 flex items-center justify-center overflow-hidden rounded-sm group-hover:bg-stone-700 transition-colors">
                 {imageUrl ? (
-                    <img src={imageUrl} alt={label} className="w-full h-full object-cover" />
+                    <img src={imageUrl} crossOrigin="anonymous" alt={label} className="w-full h-full object-cover" />
                 ) : (
                     <div className="text-stone-400 group-hover:text-stone-200 transition-colors">
                         {icon}
