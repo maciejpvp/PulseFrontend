@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router";
 import { useAlbum } from "../graphql/queries/useAlbum";
-import { Clock, User, Play, Check } from "lucide-react";
+import { Clock, User, Play, Check, ListChecks, X } from "lucide-react";
 import { formatTime } from "@/lib/formatTime";
 import { ErrorPage } from "./Error";
 import { usePlayerStore } from "@/store/player.store";
@@ -10,10 +10,12 @@ import { AlbumCover } from "../components/Album/AlbumCover";
 import { BookmarkButton } from "@/components/BookmarkButton";
 import { useImageColor } from "@/hooks/useImageColor";
 import { ArtistPic } from "@/components/Artist/ArtistPic";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { usePlaylist } from "@/graphql/mutations/usePlaylist";
+import { AlbumSkeleton } from "@/components/skeletons/AlbumSkeleton";
+import { toast } from "sonner";
 
 
 export const AlbumPage = () => {
@@ -29,8 +31,33 @@ export const AlbumPage = () => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [selectedSongIds, setSelectedSongIds] = useState<Set<string>>(new Set());
     const [targetPlaylistId, setTargetPlaylistId] = useState("");
+    const [forceLoading, setForceLoading] = useState(false);
 
-    if (isLoading) return <div className="p-8 text-stone-400">Loading...</div>;
+    useEffect(() => {
+        (async () => {
+            if (!isEditMode) {
+                setSelectedSongIds(new Set());
+                setTargetPlaylistId("");
+            }
+        })();
+    }, [isEditMode])
+
+    if (isLoading || forceLoading) return (
+        <div className="w-full h-full overflow-y-auto relative custom-scrollbar">
+            {/* Debug Toggle */}
+            <div className="fixed top-4 right-4 z-[100]">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setForceLoading((prev) => !prev)}
+                    className="bg-stone-900/80 backdrop-blur-md border-white/10 text-xs absolute top-18 right-4 z-[100]"
+                >
+                    Show Data
+                </Button>
+            </div>
+            <AlbumSkeleton />
+        </div>
+    );
     if (isError || !album) return <ErrorPage />;
 
     const songs = album.songs.edges.map((edge) => ({
@@ -88,14 +115,20 @@ export const AlbumPage = () => {
         });
 
         if (success) {
+            toast.success("Songs added to playlist", {
+                action: {
+                    label: "View Playlist",
+                    onClick: () => navigate(`/playlist/${targetPlaylistId}`)
+                }
+            });
             setIsEditMode(false);
             setSelectedSongIds(new Set());
             setTargetPlaylistId("");
-            // Optionally add a toast notification here
         }
     };
 
     console.log(album);
+
 
     return (
         <div className="w-full h-full overflow-y-auto relative custom-scrollbar">
@@ -120,13 +153,6 @@ export const AlbumPage = () => {
                                 <span className="text-xs md:text-sm font-medium uppercase tracking-wider text-stone-400 mb-2 md:mb-0">Album</span>
                                 <h1 className="text-3xl md:text-6xl font-black text-white tracking-tight mb-2 md:mb-0">{album.name}</h1>
                             </div>
-                            <Button
-                                variant={isEditMode ? "secondary" : "ghost"}
-                                onClick={() => setIsEditMode(!isEditMode)}
-                                className="w-full md:w-auto"
-                            >
-                                {isEditMode ? "Done" : "Edit"}
-                            </Button>
                         </div>
                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 text-stone-300 font-medium mt-2">
                             <div className="flex items-center gap-2 hover:underline cursor-pointer" onClick={handleNavigateToArtist}>
@@ -137,27 +163,69 @@ export const AlbumPage = () => {
                             </div>
                             <span className="text-stone-500">•</span>
                             <span className="text-stone-400 text-sm md:text-base">{songs.length} {songs.length === 1 ? "song" : "songs"}</span>
-                            <BookmarkButton defaultState={album.isBookmarked} itemId={album.id} artistId={album.artist.id} itemType="ALBUM" />
+                            <div className="flex items-center gap-2 ml-2">
+                                <BookmarkButton defaultState={album.isBookmarked} itemId={album.id} artistId={album.artist.id} itemType="ALBUM" />
+                                <Button
+                                    variant={isEditMode ? "secondary" : "ghost"}
+                                    size="sm"
+                                    onClick={() => setIsEditMode(!isEditMode)}
+                                    className={`h-8 px-3 gap-2 rounded-full ${isEditMode ? "bg-white text-black hover:bg-stone-200" : "text-stone-400 hover:text-white hover:bg-white/10"}`}
+                                >
+                                    <ListChecks size={16} />
+                                    <span className="text-xs font-bold uppercase tracking-wider">{isEditMode ? "Done" : "Edit"}</span>
+                                </Button>
+
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setForceLoading((prev) => !prev)}
+                                    className="bg-stone-900/80 backdrop-blur-md border-white/10 text-xs absolute top-4 right-4 z-[100]"
+                                >
+                                    Show Data
+                                </Button>
+
+                            </div>
                         </div>
-                        {isEditMode && (
-                            <div className="flex flex-col md:flex-row items-center gap-4 mt-4 bg-black/20 p-4 rounded-lg backdrop-blur-sm w-full">
+                    </div>
+                </div>
+
+                {isEditMode && (
+                    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-2xl">
+                        <div className="bg-stone-900/90 backdrop-blur-xl border border-white/10 p-4 rounded-2xl shadow-2xl flex flex-col md:flex-row items-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                            <div className="flex items-center gap-3 flex-1 w-full">
+                                <div className="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
+                                    {selectedSongIds.size} Selected
+                                </div>
                                 <Input
-                                    placeholder="Playlist ID"
+                                    placeholder="Enter Playlist ID..."
                                     value={targetPlaylistId}
                                     onChange={(e) => setTargetPlaylistId(e.target.value)}
-                                    className="w-full md:w-64"
+                                    className="bg-white/5 border-white/10 focus:border-primary/50 h-10"
                                 />
+                            </div>
+                            <div className="flex items-center gap-2 w-full md:w-auto">
                                 <Button
                                     onClick={handleAddToPlaylist}
                                     disabled={!targetPlaylistId || selectedSongIds.size === 0 || isAdding}
-                                    className="w-full md:w-auto"
+                                    className="flex-1 md:flex-none h-10 px-6 rounded-xl font-bold"
                                 >
-                                    {isAdding ? "Adding..." : `Add ${selectedSongIds.size} Songs to Playlist`}
+                                    {isAdding ? "Adding..." : "Add to Playlist"}
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => {
+                                        setIsEditMode(false);
+                                        setSelectedSongIds(new Set());
+                                    }}
+                                    className="h-10 w-10 rounded-xl hover:bg-white/10 text-stone-400 hover:text-white"
+                                >
+                                    <X size={20} />
                                 </Button>
                             </div>
-                        )}
+                        </div>
                     </div>
-                </div>
+                )}
 
                 <div className="px-4 md:px-8 pb-8">
                     <div className={`grid ${isEditMode ? "grid-cols-[40px_16px_1fr_auto]" : "grid-cols-[16px_1fr_auto]"} gap-4 px-4 py-2 border-b border-stone-800 text-stone-400 text-sm uppercase tracking-wider mb-4`}>
@@ -205,4 +273,3 @@ export const AlbumPage = () => {
         </div>
     );
 };
-

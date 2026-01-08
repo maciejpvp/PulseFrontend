@@ -8,6 +8,7 @@ import { PlayerBar } from "@/components/PlayerBar";
 import { CreateModal } from "@/components/modals/CreateModal";
 import { NowPlayingView } from "@/components/NowPlayingView";
 import { usePlayerStore } from "@/store/player.store";
+import { Toaster } from "sonner";
 
 export const RootLayout = () => {
     const { currentSong } = usePlayerStore();
@@ -44,6 +45,7 @@ export const RootLayout = () => {
                     <CreateModal />
                 </div>
                 <PlayerBar />
+                <Toaster position="bottom-right" theme="dark" />
             </div>
         </ThemeProvider>
     )

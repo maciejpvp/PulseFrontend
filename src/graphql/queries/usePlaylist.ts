@@ -1,6 +1,6 @@
 import { generateClient } from "aws-amplify/api";
 import { gql } from "graphql-tag";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Playlist } from "../types";
 
 const GET_PLAYLIST = gql`
@@ -38,6 +38,7 @@ interface UsePlaylistResult {
   playlist: Playlist | null;
   isLoading: boolean;
   isError: boolean;
+  refetch: () => Promise<void>;
 }
 
 export const usePlaylist = (playlistId: string): UsePlaylistResult => {
@@ -45,31 +46,31 @@ export const usePlaylist = (playlistId: string): UsePlaylistResult => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isError, setIsError] = useState<boolean>(false);
 
-  useEffect(() => {
-    const fetchPlaylist = async () => {
-      setIsLoading(true);
-      setIsError(false);
-      try {
-        const response = await client.graphql({
-          query: GET_PLAYLIST,
-          variables: { playlistId },
-        });
+  const fetchPlaylist = useCallback(async () => {
+    setIsLoading(true);
+    setIsError(false);
+    try {
+      const response = await client.graphql({
+        query: GET_PLAYLIST,
+        variables: { playlistId },
+      });
 
-        // @ts-expect-error - Amplify types
-        const data = response.data as { playlist: Playlist };
-        setPlaylist(data.playlist);
-      } catch (error) {
-        console.error("Error fetching playlist:", error);
-        setIsError(true);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (playlistId) {
-      fetchPlaylist();
+      // @ts-expect-error - Amplify types
+      const data = response.data as { playlist: Playlist };
+      setPlaylist(data.playlist);
+    } catch (error) {
+      console.error("Error fetching playlist:", error);
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
     }
   }, [playlistId]);
 
-  return { playlist, isLoading, isError };
+  useEffect(() => {
+    if (playlistId) {
+      fetchPlaylist();
+    }
+  }, [playlistId, fetchPlaylist]);
+
+  return { playlist, isLoading, isError, refetch: fetchPlaylist };
 };

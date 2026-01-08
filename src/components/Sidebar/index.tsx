@@ -1,6 +1,5 @@
 import { Book, Disc, HomeIcon, User, X } from "lucide-react"
 import { NavbarItem } from "./NavbarItem"
-import { useNavigate } from "react-router";
 import { useBookmarks } from "@/graphql/queries/useBookmarks";
 import { cn } from "@/lib/utils";
 
@@ -12,25 +11,20 @@ type Props = {
 }
 
 export const Sidebar = ({ isOpen, onClose }: Props) => {
-    const navigate = useNavigate();
     const { bookmarks = [] } = useBookmarks();
 
     const items = [
         {
             label: "Home",
             icon: <HomeIcon size={ICON_SIZE} />,
-            onClick: () => {
-                navigate("/");
-                onClose();
-            }
+            to: "/",
+            onClick: onClose
         },
         {
             label: "Your Library",
             icon: <Book size={ICON_SIZE} />,
-            onClick: () => {
-                navigate("/library");
-                onClose();
-            }
+            to: "/library",
+            onClick: onClose
         }
     ]
 
@@ -63,16 +57,11 @@ export const Sidebar = ({ isOpen, onClose }: Props) => {
 
                 <ul className="flex flex-col gap-1 px-2 md:px-0">
                     {items.map((item) => (
-                        <NavbarItem key={item.label} label={item.label} icon={item.icon} onClick={item.onClick} />
+                        <NavbarItem key={item.label} label={item.label} icon={item.icon} to={item.to} onClick={item.onClick} />
                     ))}
                 </ul>
                 <ul className="flex flex-col gap-1 mt-4 px-2 md:px-0 overflow-y-auto">
                     {bookmarks.map((item) => {
-                        const handleClick = (path: string) => {
-                            navigate(path);
-                            onClose();
-                        };
-
                         if (item.__typename === "AlbumPreview") {
                             return (
                                 <NavbarItem
@@ -81,7 +70,8 @@ export const Sidebar = ({ isOpen, onClose }: Props) => {
                                     subLabel="Album"
                                     imageUrl={item.imageUrl || undefined}
                                     icon={<Disc size={20} />}
-                                    onClick={() => handleClick(`/album/${item.artist.id}/${item.id}`)}
+                                    to={`/album/${item.artist.id}/${item.id}`}
+                                    onClick={onClose}
                                 />
                             );
                         }
@@ -93,7 +83,8 @@ export const Sidebar = ({ isOpen, onClose }: Props) => {
                                     subLabel="Playlist"
                                     imageUrl={item.imageUrl || undefined}
                                     icon={<Disc size={20} />}
-                                    onClick={() => handleClick(`/playlist/${item.id}`)}
+                                    to={`/playlist/${item.id}`}
+                                    onClick={onClose}
                                 />
                             );
                         }
@@ -105,7 +96,8 @@ export const Sidebar = ({ isOpen, onClose }: Props) => {
                                     subLabel="Artist"
                                     imageUrl={item.imageUrl || undefined}
                                     icon={<User size={20} />}
-                                    onClick={() => handleClick(`/artist/${item.id}`)}
+                                    to={`/artist/${item.id}`}
+                                    onClick={onClose}
                                 />
                             );
                         }
