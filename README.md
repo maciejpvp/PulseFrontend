@@ -16,7 +16,7 @@ Pulse is a music streaming web application for managing and playing your persona
 
 ## Infrastructure
 
-The backend is managed with AWS CDK and is hosted in a separate [repository](https://github.com/your-username/pulse-backend).
+The backend is managed with AWS CDK and is hosted in a separate [repository](https://github.com/maciejpvp/Pulse).
 
 
 ## Setup
