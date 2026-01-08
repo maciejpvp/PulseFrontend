@@ -5,10 +5,10 @@ import { usePlayerStore } from "@/store/player.store";
 import { Disc, User } from "lucide-react";
 import { useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
+import { type VariantProps } from "class-variance-authority";
+import { containerVariants, imageContainerVariants, iconVariants, textVariants } from "./variants";
 
-type BaseProps = {
-    viewType?: "Box" | "List";
-}
+type BaseProps = VariantProps<typeof containerVariants>;
 
 type Props = BaseProps & ({
     type: "album";
@@ -27,7 +27,7 @@ type Props = BaseProps & ({
 })
 
 export const CollectionView = (props: Props) => {
-    const { type, viewType = "Box" } = props;
+    const { type, viewType = "Box", size = "md" } = props;
     const navigate = useNavigate();
 
     const { playSongMutation } = useSongPlay();
@@ -93,43 +93,23 @@ export const CollectionView = (props: Props) => {
         }
     }
 
-    // If viewType is explicitly provided, use it. Otherwise, default to responsive behavior.
-    const isList = viewType === "List";
-    const isBox = viewType === "Box";
-
     return (
         <div
-            className={cn(
-                "group cursor-pointer transition-all",
-                // Box behavior: List on mobile, Box on desktop
-                isBox && "w-full flex flex-row items-center gap-3 p-2 hover:bg-white/5 rounded-md md:w-40 md:flex-col md:p-0 md:hover:bg-transparent md:rounded-none bg-stone-900 md:bg-transparent",
-                // List behavior: Always List
-                isList && "w-full flex flex-row items-center gap-3 p-2 hover:bg-white/5 rounded-md bg-stone-800 md:bg-transparent"
-            )}
+            className={cn(containerVariants({ viewType, size }))}
             onClick={handleClick}
         >
-            <div className={cn(
-                "bg-stone-800 rounded-md flex items-center justify-center group-hover:bg-stone-700 transition-colors overflow-hidden shrink-0",
-                isBox && "w-12 h-12 md:w-40 md:h-40 md:mb-3",
-                isList && "w-12 h-12"
-            )}>
+            <div className={cn(imageContainerVariants({ viewType, size }))}>
                 {imageUrl ? (
                     <img src={imageUrl} crossOrigin="anonymous" alt={name} className="w-full h-full object-cover" />
                 ) : (
-                    <Icon className={cn(
-                        "text-stone-600 group-hover:text-stone-500 transition-colors",
-                        isBox && "w-6 h-6 md:w-20 md:h-20",
-                        isList && "w-6 h-6"
-                    )} />
+                    <Icon className={cn(iconVariants({ viewType, size }))} />
                 )}
             </div>
-            <div className={cn(
-                "font-medium text-stone-200 truncate group-hover:text-white transition-colors",
-                isBox && "text-sm md:text-base md:w-full",
-                isList && "text-sm flex-1"
-            )}>
+            <div className={cn(textVariants({ viewType, size }))}>
                 {name}
             </div>
         </div>
     );
 };
+
+export { CollectionViewSkeleton } from "./CollectionViewSkeleton";

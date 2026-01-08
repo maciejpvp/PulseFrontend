@@ -5,13 +5,14 @@ import { CollectionView } from "@/components/CollectionView";
 import { ErrorPage } from "./Error";
 import { BookmarkButton } from "@/components/BookmarkButton";
 import { useImageColor } from "@/hooks/useImageColor";
+import { ArtistSkeleton } from "@/components/skeletons/ArtistSkeleton";
 
 export const ArtistPage = () => {
     const { artistId } = useParams<{ artistId: string }>();
     const { artist, isLoading, isError } = useArtist(artistId ?? "");
     const mainColor = useImageColor(artist?.imageUrl);
 
-    if (isLoading) return <div className="p-8 text-stone-400">Loading...</div>;
+    if (isLoading) return <ArtistSkeleton />;
     if (isError || !artist) return <ErrorPage />;
 
     const albums = (artist.albums?.edges || []).map((edge) => edge.node);
@@ -47,7 +48,7 @@ export const ArtistPage = () => {
                     <h2 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">Albums</h2>
                     <div className="flex flex-wrap gap-4 md:gap-6">
                         {albums.map((album) => (
-                            <CollectionView key={album.id} type="album" album={album} artistId={artist.id} />
+                            <CollectionView size="lg" key={album.id} type="album" album={album} artistId={artist.id} />
                         ))}
                     </div>
                 </div>

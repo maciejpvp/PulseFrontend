@@ -31,7 +31,6 @@ export const AlbumPage = () => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [selectedSongIds, setSelectedSongIds] = useState<Set<string>>(new Set());
     const [targetPlaylistId, setTargetPlaylistId] = useState("");
-    const [forceLoading, setForceLoading] = useState(false);
 
     useEffect(() => {
         (async () => {
@@ -42,19 +41,8 @@ export const AlbumPage = () => {
         })();
     }, [isEditMode])
 
-    if (isLoading || forceLoading) return (
+    if (isLoading) return (
         <div className="w-full h-full overflow-y-auto relative custom-scrollbar">
-            {/* Debug Toggle */}
-            <div className="fixed top-4 right-4 z-[100]">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setForceLoading((prev) => !prev)}
-                    className="bg-stone-900/80 backdrop-blur-md border-white/10 text-xs absolute top-18 right-4 z-[100]"
-                >
-                    Show Data
-                </Button>
-            </div>
             <AlbumSkeleton />
         </div>
     );
@@ -77,6 +65,9 @@ export const AlbumPage = () => {
 
         console.log(song);
         try {
+            // Instant ui response for user seeing effect immediately
+            playSong(song, "", album.id, "ALBUM", album.name, songs);
+
             const url = await playSongMutation({
                 input: {
                     songId: song.id,
@@ -174,16 +165,6 @@ export const AlbumPage = () => {
                                     <ListChecks size={16} />
                                     <span className="text-xs font-bold uppercase tracking-wider">{isEditMode ? "Done" : "Edit"}</span>
                                 </Button>
-
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setForceLoading((prev) => !prev)}
-                                    className="bg-stone-900/80 backdrop-blur-md border-white/10 text-xs absolute top-4 right-4 z-[100]"
-                                >
-                                    Show Data
-                                </Button>
-
                             </div>
                         </div>
                     </div>

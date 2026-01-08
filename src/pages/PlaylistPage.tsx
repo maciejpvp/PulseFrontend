@@ -94,6 +94,9 @@ export const PlaylistPage = () => {
         }
 
         try {
+            // Instant ui response for user seeing effect immediately
+            playSong(song, "", playlist.id, "PLAYLIST", playlist.name, songs);
+
             const url = await playSongMutation({
                 input: {
                     songId: song.id,

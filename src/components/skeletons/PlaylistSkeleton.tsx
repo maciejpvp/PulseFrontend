@@ -1,5 +1,6 @@
 import { Clock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CollectionViewSkeleton } from "@/components/CollectionView";
 
 export const PlaylistSkeleton = () => {
     return (
@@ -38,6 +39,15 @@ export const PlaylistSkeleton = () => {
                             <Skeleton className="h-4 w-10" />
                         </div>
                     ))}
+                </div>
+
+                <div className="px-8 pb-8">
+                    <Skeleton className="h-8 w-48 mb-4 md:mb-6" />
+                    <div className="flex flex-wrap gap-4 md:gap-6">
+                        {[...Array(4)].map((_, i) => (
+                            <CollectionViewSkeleton key={i} size="md" />
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>
