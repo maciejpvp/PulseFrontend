@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { Song, MutationSongPlayArgs, ContextType } from "../graphql/types";
 
 type PlayerStore = {
+    masterDeviceId: string | null;
     currentSong: Song | null;
     isPlaying: boolean;
     volume: number;
@@ -21,8 +22,9 @@ type PlayerStore = {
     contextType: ContextType | null;
     contextName: string | null;
 
+    setMasterDeviceId: (deviceId: string | null) => void;
     setCurrentSong: (song: Song | null) => void;
-    togglePlay: () => void;
+    togglePlay: () => Promise<void>;
     setVolume: (volume: number) => void;
     setProgress: (progress: number) => void;
     setDuration: (duration: number) => void;
@@ -37,6 +39,7 @@ type PlayerStore = {
 };
 
 export const usePlayerStore = create<PlayerStore>((set, get) => ({
+    masterDeviceId: null,
     currentSong: null,
     isPlaying: false,
     volume: 0.5,
@@ -76,16 +79,36 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
         }
     },
 
-    togglePlay: () => {
-        const { audio, isPlaying, currentSong } = get();
+    togglePlay: async () => {
+        const { audio, isPlaying, currentSong, volume } = get();
         if (!audio || !currentSong) return;
 
+        const fadeDuration = 200; // 0.2 seconds
+        const steps = 10;
+        const stepTime = fadeDuration / steps;
+
         if (isPlaying) {
+            // Fade out
+            const startVolume = audio.volume;
+            for (let i = 1; i <= steps; i++) {
+                await new Promise((resolve) => setTimeout(resolve, stepTime));
+                audio.volume = Math.max(0, startVolume - (startVolume * (i / steps)));
+            }
             audio.pause();
+            set({ isPlaying: false });
+            // Restore volume for next time
+            audio.volume = volume;
         } else {
+            // Fade in
+            audio.volume = 0;
+            set({ isPlaying: true });
             audio.play().catch(console.error);
+            for (let i = 1; i <= steps; i++) {
+                await new Promise((resolve) => setTimeout(resolve, stepTime));
+                audio.volume = Math.min(volume, volume * (i / steps));
+            }
+            audio.volume = volume;
         }
-        set({ isPlaying: !isPlaying });
     },
 
     setVolume: (volume) => {
@@ -317,6 +340,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
         activeAudio.play().catch(console.error);
     },
+    setMasterDeviceId: (deviceId) => set({ masterDeviceId: deviceId }),
 }));
 
 // Initialize audio listeners

@@ -13,6 +13,10 @@ import Login from "./pages/Login";
 import { useAuthStore } from "./store/auth.store";
 import "./amplify";
 import { PlaylistPage } from "./pages/PlaylistPage";
+import type { Device } from "./graphql/types";
+import { useOnDevicePing } from "./graphql/subscriptions/onDevicePing";
+import { useCloudStateStore } from "./store/cloudstate.store";
+import { useDeviceHeartbeat } from "./hooks/useDeviceHeartbeat";
 
 
 const publicRoutes = [
@@ -47,7 +51,29 @@ const anonymousOnlyRoutes = [
 ];
 
 export const App = () => {
+    useDeviceHeartbeat();
     const { isLoggedIn, checkAuth } = useAuthStore();
+
+    const onDevicePing = (device: Device) => {
+        const currentDevices = useCloudStateStore.getState().devices;
+        const deviceExists = currentDevices.some((d) => d.deviceId === device.deviceId);
+
+        let newDevices;
+        if (deviceExists) {
+            newDevices = currentDevices.map((d) =>
+                d.deviceId === device.deviceId ? { ...d, lastSeen: device.lastSeen } : d
+            );
+        } else {
+            newDevices = [...currentDevices, device];
+        }
+
+        useCloudStateStore.getState().setDevices(newDevices);
+    };
+
+    useOnDevicePing({
+        onData: onDevicePing,
+        enabled: isLoggedIn,
+    });
 
     useEffect(() => {
         checkAuth();

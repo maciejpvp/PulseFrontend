@@ -122,6 +122,32 @@ export type BookmarkResponse = {
   bookmarks: BookmarkConnection;
 };
 
+export type CloudState = {
+  __typename?: 'CloudState';
+  isPlaying?: Maybe<Scalars['Boolean']['output']>;
+  positionMs?: Maybe<Scalars['Int']['output']>;
+  primeDeviceId?: Maybe<Scalars['String']['output']>;
+  repeatMode?: Maybe<Scalars['String']['output']>;
+  shuffleMode?: Maybe<Scalars['String']['output']>;
+  trackId?: Maybe<Scalars['String']['output']>;
+  volume?: Maybe<Scalars['Int']['output']>;
+};
+
+export type CloudStateAttributes = {
+  isPlaying?: InputMaybe<Scalars['Boolean']['input']>;
+  positionMs?: InputMaybe<Scalars['Int']['input']>;
+  primeDeviceId?: InputMaybe<Scalars['String']['input']>;
+  repeatMode?: InputMaybe<Scalars['String']['input']>;
+  shuffleMode?: InputMaybe<Scalars['String']['input']>;
+  trackId?: InputMaybe<Scalars['String']['input']>;
+  volume?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type CloudStateUpdateInput = {
+  attributes: CloudStateAttributes;
+  version?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type ContextType =
   | 'ALBUM'
   | 'ARTIST'
@@ -149,18 +175,50 @@ export type CreatePlaylistResponse = {
   playlist: Playlist;
 };
 
+export type Device = {
+  __typename?: 'Device';
+  deviceId: Scalars['String']['output'];
+  lastSeen: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+};
+
+export type DevicePingInput = {
+  deviceId: Scalars['String']['input'];
+  lastSeen: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  type: Scalars['String']['input'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
+  _publishCloudState?: Maybe<CloudState>;
+  _publishDevicePing?: Maybe<Device>;
   albumCreate: CreateAlbumResponse;
+  albumRemove: Scalars['Boolean']['output'];
   artistCreate: CreateArtistResponse;
+  artistRemove: Scalars['Boolean']['output'];
   bookmarkAdd: Scalars['Boolean']['output'];
   bookmarkRemove: Scalars['Boolean']['output'];
+  cloudStateUpdate: Scalars['Boolean']['output'];
+  devicePing: Scalars['Boolean']['output'];
   playlistAddSong: PlaylistAddSongResult;
   playlistCreate: CreatePlaylistResponse;
   playlistRemoveSong: PlaylistRemoveSongResult;
   /** Get S3 upload URL to upload mp3 file into bucket */
   songPlay: Scalars['String']['output'];
+  songRemove: Scalars['Boolean']['output'];
   songUpload: SongUploadResponse;
+};
+
+
+export type Mutation_PublishCloudStateArgs = {
+  input: CloudStateAttributes;
+};
+
+
+export type Mutation_PublishDevicePingArgs = {
+  input: DevicePingInput;
 };
 
 
@@ -170,8 +228,18 @@ export type MutationAlbumCreateArgs = {
 };
 
 
+export type MutationAlbumRemoveArgs = {
+  input: RemoveAlbumInput;
+};
+
+
 export type MutationArtistCreateArgs = {
   name: Scalars['String']['input'];
+};
+
+
+export type MutationArtistRemoveArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -182,6 +250,16 @@ export type MutationBookmarkAddArgs = {
 
 export type MutationBookmarkRemoveArgs = {
   input: BookmarkRemoveInput;
+};
+
+
+export type MutationCloudStateUpdateArgs = {
+  input: CloudStateUpdateInput;
+};
+
+
+export type MutationDevicePingArgs = {
+  input: DevicePingInput;
 };
 
 
@@ -202,6 +280,11 @@ export type MutationPlaylistRemoveSongArgs = {
 
 export type MutationSongPlayArgs = {
   input: SongPlayInput;
+};
+
+
+export type MutationSongRemoveArgs = {
+  input: RemoveSongInput;
 };
 
 
@@ -271,6 +354,8 @@ export type Query = {
   album: Album;
   artist: Artist;
   bookmarks: BookmarkConnection;
+  cloudState: CloudState;
+  devices: Array<Device>;
   playlist: Playlist;
   recentPlayed: Array<RecentPlayedItem>;
   search?: Maybe<SearchResponse>;
@@ -304,6 +389,16 @@ export type QuerySongArgs = {
 };
 
 export type RecentPlayedItem = AlbumPreview | ArtistPreview | PlaylistPreview | SongPreview;
+
+export type RemoveAlbumInput = {
+  albumId: Scalars['String']['input'];
+  artistId: Scalars['String']['input'];
+};
+
+export type RemoveSongInput = {
+  artistId: Scalars['ID']['input'];
+  songId: Scalars['ID']['input'];
+};
 
 export type SearchInput = {
   query: Scalars['String']['input'];
@@ -368,6 +463,12 @@ export type SongUploadResponse = {
   uploadUrl: Scalars['String']['output'];
 };
 
+export type Subscription = {
+  __typename?: 'Subscription';
+  onCloudState?: Maybe<CloudState>;
+  onDevicePing?: Maybe<Device>;
+};
+
 export type User = {
   __typename?: 'User';
   id: Scalars['ID']['output'];
@@ -416,6 +517,20 @@ export type SongUploadMutationVariables = Exact<{
 
 export type SongUploadMutation = { __typename?: 'Mutation', songUpload: { __typename?: 'SongUploadResponse', uploadUrl: string } };
 
+export type PlaylistAddSongMutationVariables = Exact<{
+  input: PlaylistAddSongInput;
+}>;
+
+
+export type PlaylistAddSongMutation = { __typename?: 'Mutation', playlistAddSong: { __typename?: 'PlaylistAddSongResult', playlistId: string } };
+
+export type PlaylistRemoveSongMutationVariables = Exact<{
+  input: PlaylistRemoveSongInput;
+}>;
+
+
+export type PlaylistRemoveSongMutation = { __typename?: 'Mutation', playlistRemoveSong: { __typename?: 'PlaylistRemoveSongResult', playlistId: string } };
+
 export type SongPlayMutationVariables = Exact<{
   input: SongPlayInput;
 }>;
@@ -428,7 +543,7 @@ export type GetAlbumQueryVariables = Exact<{
 }>;
 
 
-export type GetAlbumQuery = { __typename?: 'Query', album: { __typename?: 'Album', id: string, name: string, imageUrl?: string | null, isBookmarked: boolean, artist: { __typename?: 'ArtistPreview', id: string, name: string }, songs: { __typename?: 'SongConnection', edges: Array<{ __typename?: 'SongEdge', node: { __typename?: 'Song', id: string, title: string, duration?: number | null, artist: { __typename?: 'ArtistPreview', id: string, name: string, imageUrl?: string | null } } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean } } } };
+export type GetAlbumQuery = { __typename?: 'Query', album: { __typename?: 'Album', id: string, name: string, imageUrl?: string | null, isBookmarked: boolean, artist: { __typename?: 'ArtistPreview', id: string, name: string, imageUrl?: string | null }, songs: { __typename?: 'SongConnection', edges: Array<{ __typename?: 'SongEdge', node: { __typename?: 'Song', id: string, title: string, duration?: number | null, imageUrl?: string | null, artist: { __typename?: 'ArtistPreview', id: string, name: string, imageUrl?: string | null } } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean } } } };
 
 export type GetArtistQueryVariables = Exact<{
   artistId: Scalars['ID']['input'];
@@ -460,7 +575,7 @@ export type GetPlaylistQueryVariables = Exact<{
 }>;
 
 
-export type GetPlaylistQuery = { __typename?: 'Query', playlist: { __typename?: 'Playlist', id: string, name: string, imageUrl?: string | null, isBookmarked: boolean, songs: { __typename?: 'SongConnection', edges: Array<{ __typename?: 'SongEdge', node: { __typename?: 'Song', id: string, title: string, duration?: number | null, artist: { __typename?: 'ArtistPreview', id: string, name: string } } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean } } } };
+export type GetPlaylistQuery = { __typename?: 'Query', playlist: { __typename?: 'Playlist', id: string, name: string, imageUrl?: string | null, isBookmarked: boolean, songs: { __typename?: 'SongConnection', edges: Array<{ __typename?: 'SongEdge', node: { __typename?: 'Song', id: string, title: string, duration?: number | null, imageUrl?: string | null, artist: { __typename?: 'ArtistPreview', id: string, name: string } } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean } } } };
 
 export type GetRecentlyPlayedQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -468,8 +583,8 @@ export type GetRecentlyPlayedQueryVariables = Exact<{ [key: string]: never; }>;
 export type GetRecentlyPlayedQuery = { __typename?: 'Query', recentPlayed: Array<
     | { __typename: 'AlbumPreview', id: string, imageUrl?: string | null, name: string, artist: { __typename?: 'ArtistPreview', id: string, imageUrl?: string | null } }
     | { __typename: 'ArtistPreview', id: string, name: string, imageUrl?: string | null }
-    | { __typename: 'PlaylistPreview', id: string, name: string }
-    | { __typename: 'SongPreview', id: string, artistId: string, title: string }
+    | { __typename: 'PlaylistPreview', id: string, name: string, imageUrl?: string | null }
+    | { __typename: 'SongPreview', id: string, artistId: string, title: string, imageUrl?: string | null }
   > };
 
 export type SearchQueryVariables = Exact<{
@@ -483,3 +598,8 @@ export type SearchQuery = { __typename?: 'Query', search?: { __typename?: 'Searc
       | { __typename: 'PlaylistPreview', id: string, name: string, imageUrl?: string | null }
       | { __typename: 'SongPreview', id: string, title: string, artistId: string }
     > } | null };
+
+export type OnDevicePingSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type OnDevicePingSubscription = { __typename?: 'Subscription', onDevicePing?: { __typename?: 'Device', deviceId: string, name: string, type: string, lastSeen: string } | null };

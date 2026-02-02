@@ -1,4 +1,5 @@
 import { usePlayerStore } from "@/store/player.store";
+import { useCloudStateStore } from "@/store/cloudstate.store";
 import { createPortal } from "react-dom";
 import { formatTime } from "@/lib/formatTime";
 import {
@@ -11,8 +12,17 @@ import {
     Repeat,
     Repeat1,
     Shuffle,
-    Disc
+    Disc,
+    Monitor,
+    Smartphone,
+    HelpCircle,
+    Laptop
 } from "lucide-react";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 import { useSongPlay } from "@/graphql/mutations/useSongPlay";
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
@@ -38,9 +48,14 @@ export const PlayerBar = () => {
         nextSongData,
         isCrossfading
     } = usePlayerStore();
+    const devices = useCloudStateStore(store => store.devices);
     const { playSongMutation } = useSongPlay();
     const progressBarRef = useRef<HTMLDivElement>(null);
     const knobRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        useCloudStateStore.getState().fetchDevices();
+    }, [])
 
     useEffect(() => {
         const audio = usePlayerStore.getState().audio;
@@ -117,6 +132,14 @@ export const PlayerBar = () => {
         setVolume(Number(e.target.value));
     };
 
+    const getDeviceIcon = (type: string) => {
+        switch (type) {
+            case "DESKTOP": return <Monitor className="w-4 h-4" />;
+            case "MOBILE": return <Smartphone className="w-4 h-4" />;
+            default: return <HelpCircle className="w-4 h-4" />;
+        }
+    };
+
     return createPortal(
         <div className={cn(
             "fixed z-50 group/player transition-all duration-300",
@@ -178,7 +201,7 @@ export const PlayerBar = () => {
             </div>
 
             {/* Controls */}
-            <div className="flex items-center gap-4 md:flex-col md:gap-2 md:w-[40%] md:max-w-[600px]">
+            <div className="flex items-center gap-4 md:flex-col md:gap-2 md:w-[40%] md:max-w-[600px] flex-shrink-0">
                 <div className="flex items-center gap-4 md:gap-6">
                     <button
                         onClick={toggleShuffle}
@@ -233,28 +256,57 @@ export const PlayerBar = () => {
                 </div>
             </div>
 
-            {/* Volume - Desktop Only */}
-            <div
-                className="hidden md:flex items-center justify-end gap-3 w-[30%]"
-                onWheel={(e) => {
-                    e.preventDefault();
-                    const delta = e.deltaY > 0 ? -0.05 : 0.05;
-                    const newVolume = Math.max(0, Math.min(1, volume + delta));
-                    setVolume(newVolume);
-                }}
-            >
-                <button className="text-stone-400 hover:text-white transition-colors">
-                    {volume === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                </button>
-                <input
-                    type="range"
-                    min={0}
-                    max={1}
-                    step={0.01}
-                    value={volume}
-                    onChange={handleVolumeChange}
-                    className="w-24 h-1 bg-stone-600 rounded-lg appearance-none cursor-pointer accent-white hover:accent-green-500"
-                />
+            {/* Right Section: Devices & Volume */}
+            <div className="flex items-center justify-end gap-1 md:gap-3 md:w-[30%] min-w-0">
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <button className="text-stone-400 hover:text-white transition-colors p-2 shrink-0">
+                            <Laptop className="w-5 h-5 md:w-6 md:h-6" />
+                        </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64 bg-stone-900 border-stone-800 text-white p-3 z-[60]" side="top" align="end">
+                        <div className="flex flex-col gap-2">
+                            <h3 className="text-sm font-semibold mb-1 text-stone-400 uppercase tracking-wider text-[10px]">Active Devices</h3>
+                            {devices.length > 0 ? (
+                                devices.map((device, index) => (
+                                    <div key={device.deviceId} className={cn(
+                                        "flex items-center gap-3 p-2 rounded-md transition-colors",
+                                        index === 0 ? "text-green-500 bg-green-500/10" : "text-stone-300 hover:bg-white/5"
+                                    )}>
+                                        {getDeviceIcon(device.type)}
+                                        <span className="text-xs font-medium truncate">{device.name}</span>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-xs text-stone-500 py-2 italic">No devices found</p>
+                            )}
+                        </div>
+                    </PopoverContent>
+                </Popover>
+
+                {/* Volume - Desktop Only */}
+                <div
+                    className="hidden md:flex items-center gap-3"
+                    onWheel={(e) => {
+                        e.preventDefault();
+                        const delta = e.deltaY > 0 ? -0.05 : 0.05;
+                        const newVolume = Math.max(0, Math.min(1, volume + delta));
+                        setVolume(newVolume);
+                    }}
+                >
+                    <button className="text-stone-400 hover:text-white transition-colors">
+                        {volume === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                    </button>
+                    <input
+                        type="range"
+                        min={0}
+                        max={1}
+                        step={0.01}
+                        value={volume}
+                        onChange={handleVolumeChange}
+                        className="w-24 h-1 bg-stone-600 rounded-lg appearance-none cursor-pointer accent-white hover:accent-green-500"
+                    />
+                </div>
             </div>
         </div>,
         document.getElementById("player-root")!
