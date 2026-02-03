@@ -18,6 +18,7 @@ const client = generateClient();
 type CloudState = {
     primeDeviceId: string
     trackId: string
+    trackArtistId: string
     devices: Device[]
     setPrimeDeviceId: (id: string) => void
     setTrackId: (id: string) => void
@@ -28,6 +29,7 @@ type CloudState = {
 export const useCloudStateStore = create<CloudState>((set) => ({
     primeDeviceId: "",
     trackId: "",
+    trackArtistId: "",
     devices: [],
     setPrimeDeviceId: (id: string) => set({ primeDeviceId: id }),
     setTrackId: (id: string) => set({ trackId: id }),
@@ -39,6 +41,7 @@ export const useCloudStateStore = create<CloudState>((set) => ({
             });
             // @ts-expect-error - Handling Amplify's generic response type
             const data = response.data as { devices: Device[] };
+            console.log(data);
             if (data?.devices) {
                 set({ devices: data.devices });
             }

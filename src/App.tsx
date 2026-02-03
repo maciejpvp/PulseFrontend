@@ -13,10 +13,14 @@ import Login from "./pages/Login";
 import { useAuthStore } from "./store/auth.store";
 import "./amplify";
 import { PlaylistPage } from "./pages/PlaylistPage";
-import type { Device } from "./graphql/types";
+import type { CloudState, Device } from "./graphql/types";
 import { useOnDevicePing } from "./graphql/subscriptions/onDevicePing";
 import { useCloudStateStore } from "./store/cloudstate.store";
 import { useDeviceHeartbeat } from "./hooks/useDeviceHeartbeat";
+import { fetchCloudState } from "./graphql/queries/fetchCloudstate";
+import { usePlayerStore } from "./store/player.store";
+import { useOnCloudstateUpdate } from "./graphql/subscriptions/onCloudstate";
+import { getSong } from "./graphql/queries/useSong";
 
 
 const publicRoutes = [
@@ -75,9 +79,48 @@ export const App = () => {
         enabled: isLoggedIn,
     });
 
+    const onClouseState = async (data: CloudState) => {
+        console.log(data);
+        const playerStore = usePlayerStore.getState();
+        const cloudStateStore = useCloudStateStore.getState();
+
+        if (data.volume) {
+            const volume = Math.min(data.volume / 100, 1);
+            playerStore.setVolume(volume);
+        }
+
+        if (data.primeDeviceId) {
+            cloudStateStore.setPrimeDeviceId(data.primeDeviceId);
+        }
+
+        if (data.trackId && data.trackArtistId) {
+            const song = await getSong(data.trackId, data.trackArtistId);
+            if (!song) return;
+            playerStore.setCurrentSong(song);
+        }
+    }
+
+    useOnCloudstateUpdate({
+        onData: onClouseState,
+        enabled: isLoggedIn,
+    });
+
     useEffect(() => {
         checkAuth();
     }, [checkAuth]);
+
+
+    // Get Cloud State
+    useEffect(() => {
+        if (!isLoggedIn) return;
+        (async () => {
+            const cloudState = await fetchCloudState();
+
+            if (!cloudState) return;
+
+            onClouseState(cloudState);
+        })()
+    }, [isLoggedIn])
 
     const router = useMemo(
         () =>

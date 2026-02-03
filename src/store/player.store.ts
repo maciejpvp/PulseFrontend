@@ -1,8 +1,9 @@
 import { create } from "zustand";
 import type { Song, MutationSongPlayArgs, ContextType } from "../graphql/types";
+import { debouncedUpdateVolume } from "@/graphql/mutations/CloudStateMutations/updateVolume";
+import { debouncedUpdateIsPlaying } from "@/graphql/mutations/CloudStateMutations/updateIsPlaying";
 
 type PlayerStore = {
-    masterDeviceId: string | null;
     currentSong: Song | null;
     isPlaying: boolean;
     volume: number;
@@ -22,7 +23,6 @@ type PlayerStore = {
     contextType: ContextType | null;
     contextName: string | null;
 
-    setMasterDeviceId: (deviceId: string | null) => void;
     setCurrentSong: (song: Song | null) => void;
     togglePlay: () => Promise<void>;
     setVolume: (volume: number) => void;
@@ -39,7 +39,6 @@ type PlayerStore = {
 };
 
 export const usePlayerStore = create<PlayerStore>((set, get) => ({
-    masterDeviceId: null,
     currentSong: null,
     isPlaying: false,
     volume: 0.5,
@@ -96,12 +95,14 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
             }
             audio.pause();
             set({ isPlaying: false });
+            debouncedUpdateIsPlaying(false);
             // Restore volume for next time
             audio.volume = volume;
         } else {
             // Fade in
             audio.volume = 0;
             set({ isPlaying: true });
+            debouncedUpdateIsPlaying(true);
             audio.play().catch(console.error);
             for (let i = 1; i <= steps; i++) {
                 await new Promise((resolve) => setTimeout(resolve, stepTime));
@@ -116,6 +117,9 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
         if (audio1) audio1.volume = volume;
         if (audio2) audio2.volume = volume;
         set({ volume });
+
+        // Debounce cloud state update
+        debouncedUpdateVolume(volume)
     },
 
     setProgress: (progress) => {
@@ -340,7 +344,6 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
         activeAudio.play().catch(console.error);
     },
-    setMasterDeviceId: (deviceId) => set({ masterDeviceId: deviceId }),
 }));
 
 // Initialize audio listeners

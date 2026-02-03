@@ -26,6 +26,7 @@ import {
 import { useSongPlay } from "@/graphql/mutations/useSongPlay";
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { changePrimeDevice } from "@/graphql/mutations/CloudStateMutations/changePrimeDevice";
 
 export const PlayerBar = () => {
     const {
@@ -52,6 +53,7 @@ export const PlayerBar = () => {
     const { playSongMutation } = useSongPlay();
     const progressBarRef = useRef<HTMLDivElement>(null);
     const knobRef = useRef<HTMLDivElement>(null);
+    const primeDeviceId = useCloudStateStore(store => store.primeDeviceId);
 
     useEffect(() => {
         useCloudStateStore.getState().fetchDevices();
@@ -268,14 +270,14 @@ export const PlayerBar = () => {
                         <div className="flex flex-col gap-2">
                             <h3 className="text-sm font-semibold mb-1 text-stone-400 uppercase tracking-wider text-[10px]">Active Devices</h3>
                             {devices.length > 0 ? (
-                                devices.map((device, index) => (
-                                    <div key={device.deviceId} className={cn(
+                                devices.map((device) => (
+                                    <button key={device.deviceId} className={cn(
                                         "flex items-center gap-3 p-2 rounded-md transition-colors",
-                                        index === 0 ? "text-green-500 bg-green-500/10" : "text-stone-300 hover:bg-white/5"
-                                    )}>
+                                        primeDeviceId === device.deviceId ? "text-green-500 bg-green-500/10" : "text-stone-300 hover:bg-white/5"
+                                    )} onClick={() => changePrimeDevice(device.deviceId)}>
                                         {getDeviceIcon(device.type)}
                                         <span className="text-xs font-medium truncate">{device.name}</span>
-                                    </div>
+                                    </button>
                                 ))
                             ) : (
                                 <p className="text-xs text-stone-500 py-2 italic">No devices found</p>

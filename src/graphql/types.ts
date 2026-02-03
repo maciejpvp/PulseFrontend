@@ -129,6 +129,7 @@ export type CloudState = {
   primeDeviceId?: Maybe<Scalars['String']['output']>;
   repeatMode?: Maybe<Scalars['String']['output']>;
   shuffleMode?: Maybe<Scalars['String']['output']>;
+  trackArtistId?: Maybe<Scalars['String']['output']>;
   trackId?: Maybe<Scalars['String']['output']>;
   volume?: Maybe<Scalars['Int']['output']>;
 };
@@ -139,6 +140,7 @@ export type CloudStateAttributes = {
   primeDeviceId?: InputMaybe<Scalars['String']['input']>;
   repeatMode?: InputMaybe<Scalars['String']['input']>;
   shuffleMode?: InputMaybe<Scalars['String']['input']>;
+  trackArtistId?: InputMaybe<Scalars['String']['input']>;
   trackId?: InputMaybe<Scalars['String']['input']>;
   volume?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -185,7 +187,6 @@ export type Device = {
 
 export type DevicePingInput = {
   deviceId: Scalars['String']['input'];
-  lastSeen: Scalars['String']['input'];
   name: Scalars['String']['input'];
   type: Scalars['String']['input'];
 };
@@ -474,6 +475,27 @@ export type User = {
   id: Scalars['ID']['output'];
 };
 
+export type ChangePrimeDeviceMutationVariables = Exact<{
+  primeDeviceId?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ChangePrimeDeviceMutation = { __typename?: 'Mutation', cloudStateUpdate: boolean };
+
+export type UpdateIsPlayingMutationVariables = Exact<{
+  isPlaying?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type UpdateIsPlayingMutation = { __typename?: 'Mutation', cloudStateUpdate: boolean };
+
+export type UpdateVolumeMutationVariables = Exact<{
+  volume?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type UpdateVolumeMutation = { __typename?: 'Mutation', cloudStateUpdate: boolean };
+
 export type BookmarkAddMutationVariables = Exact<{
   input: BookmarkAddInput;
 }>;
@@ -538,6 +560,11 @@ export type SongPlayMutationVariables = Exact<{
 
 export type SongPlayMutation = { __typename?: 'Mutation', songPlay: string };
 
+export type GetCloudStateQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetCloudStateQuery = { __typename?: 'Query', cloudState: { __typename?: 'CloudState', primeDeviceId?: string | null, trackId?: string | null, isPlaying?: boolean | null, positionMs?: number | null, repeatMode?: string | null, shuffleMode?: string | null, volume?: number | null } };
+
 export type GetAlbumQueryVariables = Exact<{
   input: AlbumQueryInput;
 }>;
@@ -599,7 +626,24 @@ export type SearchQuery = { __typename?: 'Query', search?: { __typename?: 'Searc
       | { __typename: 'SongPreview', id: string, title: string, artistId: string }
     > } | null };
 
+export type OnCloudStateUpdateSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type OnCloudStateUpdateSubscription = { __typename?: 'Subscription', onCloudState?: { __typename?: 'CloudState', primeDeviceId?: string | null, trackId?: string | null, isPlaying?: boolean | null, positionMs?: number | null, repeatMode?: string | null, shuffleMode?: string | null, volume?: number | null } | null };
+
 export type OnDevicePingSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type OnDevicePingSubscription = { __typename?: 'Subscription', onDevicePing?: { __typename?: 'Device', deviceId: string, name: string, type: string, lastSeen: string } | null };
+export type OnDevicePingSubscription = { __typename?: 'Subscription', onDevicePing?: { __typename?: 'Device', deviceId: string, name: string, type: string } | null };
+
+export type DevicePingMutationVariables = Exact<{
+  input: DevicePingInput;
+}>;
+
+
+export type DevicePingMutation = { __typename?: 'Mutation', devicePing: boolean };
+
+export type GetDevicesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetDevicesQuery = { __typename?: 'Query', devices: Array<{ __typename?: 'Device', deviceId: string, name: string, type: string }> };
