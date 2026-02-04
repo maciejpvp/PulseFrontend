@@ -1,4 +1,3 @@
-import { useSongPlay } from "@/graphql/mutations/useSongPlay";
 import { getFullSongItem } from "@/graphql/queries/useGetFullSongItem";
 import type { AlbumPreview, ArtistPreview, MutationSongPlayArgs, PlaylistPreview, SongPreview } from "@/graphql/types";
 import { usePlayerStore } from "@/store/player.store";
@@ -7,6 +6,7 @@ import { useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
 import { type VariantProps } from "class-variance-authority";
 import { containerVariants, imageContainerVariants, iconVariants, textVariants } from "./variants";
+import { playSongMutation } from "@/graphql/mutations/useSongPlay";
 
 type BaseProps = VariantProps<typeof containerVariants>;
 
@@ -30,7 +30,6 @@ export const CollectionView = (props: Props) => {
     const { type, viewType = "Box", size = "md" } = props;
     const navigate = useNavigate();
 
-    const { playSongMutation } = useSongPlay();
     const { playSong } = usePlayerStore();
 
     let name = "";

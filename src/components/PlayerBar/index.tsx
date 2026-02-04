@@ -23,10 +23,10 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import { useSongPlay } from "@/graphql/mutations/useSongPlay";
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { changePrimeDevice } from "@/graphql/mutations/CloudStateMutations/changePrimeDevice";
+import { playSongMutation } from "@/graphql/mutations/useSongPlay";
 
 export const PlayerBar = () => {
     const {
@@ -50,7 +50,6 @@ export const PlayerBar = () => {
         isCrossfading
     } = usePlayerStore();
     const devices = useCloudStateStore(store => store.devices);
-    const { playSongMutation } = useSongPlay();
     const progressBarRef = useRef<HTMLDivElement>(null);
     const knobRef = useRef<HTMLDivElement>(null);
     const primeDeviceId = useCloudStateStore(store => store.primeDeviceId);
@@ -71,7 +70,7 @@ export const PlayerBar = () => {
 
         audio.addEventListener("ended", handleEnded);
         return () => audio.removeEventListener("ended", handleEnded);
-    }, [nextSong, playSongMutation, isCrossfading]);
+    }, [nextSong, isCrossfading]);
 
     useEffect(() => {
         if (isCrossfading || !duration || !currentSong) return;
@@ -95,7 +94,6 @@ export const PlayerBar = () => {
         isCrossfading,
         prepareNextSong,
         startCrossfade,
-        playSongMutation
     ]);
 
     useEffect(() => {

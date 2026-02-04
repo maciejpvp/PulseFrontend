@@ -4,7 +4,6 @@ import { Clock, User, Play, Check, ListChecks, X } from "lucide-react";
 import { formatTime } from "@/lib/formatTime";
 import { ErrorPage } from "./Error";
 import { usePlayerStore } from "@/store/player.store";
-import { useSongPlay } from "@/graphql/mutations/useSongPlay";
 import type { Song } from "../graphql/types";
 import { AlbumCover } from "../components/Album/AlbumCover";
 import { BookmarkButton } from "@/components/BookmarkButton";
@@ -16,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { usePlaylist } from "@/graphql/mutations/usePlaylist";
 import { AlbumSkeleton } from "@/components/skeletons/AlbumSkeleton";
 import { toast } from "sonner";
+import { playSongMutation } from "@/graphql/mutations/useSongPlay";
 
 
 export const AlbumPage = () => {
@@ -24,7 +24,6 @@ export const AlbumPage = () => {
     const { album, isLoading, isError } = useAlbum(albumId ?? "", artistId ?? "");
     const playSong = usePlayerStore((state) => state.playSong);
     const currentSong = usePlayerStore((state) => state.currentSong);
-    const { playSongMutation } = useSongPlay();
     const mainColor = useImageColor(album?.imageUrl);
     const { addSong, isAdding } = usePlaylist();
 

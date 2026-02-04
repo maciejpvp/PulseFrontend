@@ -4,7 +4,6 @@ import { usePlaylist as usePlaylistMutation } from '../graphql/mutations/usePlay
 import { Clock, Play, Check, ListChecks, Trash } from "lucide-react";
 import { ErrorPage } from "./Error";
 import { usePlayerStore } from "@/store/player.store";
-import { useSongPlay } from "@/graphql/mutations/useSongPlay";
 import type { PlaylistRemoveSongInput, Song } from "../graphql/types";
 import { AlbumCover } from "@/components/Album/AlbumCover";
 import { BookmarkButton } from "@/components/BookmarkButton";
@@ -15,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { formatTime } from "@/lib/formatTime";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { playSongMutation } from "@/graphql/mutations/useSongPlay";
 
 export const PlaylistPage = () => {
     const { playlistId } = useParams<{ playlistId: string }>();
@@ -22,7 +22,6 @@ export const PlaylistPage = () => {
     const { removeSong } = usePlaylistMutation();
     const playSong = usePlayerStore((state) => state.playSong);
     const currentSong = usePlayerStore((state) => state.currentSong);
-    const { playSongMutation } = useSongPlay();
     const mainColor = useImageColor(playlist?.imageUrl);
 
     const [isEditMode, setIsEditMode] = useState(false);

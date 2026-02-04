@@ -80,7 +80,7 @@ export const App = () => {
     });
 
     const onClouseState = async (data: CloudState) => {
-        console.log(data);
+        console.log("onClouseState", data);
         const playerStore = usePlayerStore.getState();
         const cloudStateStore = useCloudStateStore.getState();
 
@@ -97,6 +97,12 @@ export const App = () => {
             const song = await getSong(data.trackId, data.trackArtistId);
             if (!song) return;
             playerStore.setCurrentSong(song);
+        }
+
+        if (data.isPlaying !== null) {
+            if (data.isPlaying !== playerStore.isPlaying) {
+                playerStore.togglePlay({ sendToCloud: false });
+            }
         }
     }
 

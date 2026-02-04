@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { Song, MutationSongPlayArgs, ContextType } from "../graphql/types";
 import { debouncedUpdateVolume } from "@/graphql/mutations/CloudStateMutations/updateVolume";
 import { debouncedUpdateIsPlaying } from "@/graphql/mutations/CloudStateMutations/updateIsPlaying";
+import { playSongMutation } from "@/graphql/mutations/useSongPlay";
 
 type PlayerStore = {
     currentSong: Song | null;
@@ -24,7 +25,7 @@ type PlayerStore = {
     contextName: string | null;
 
     setCurrentSong: (song: Song | null) => void;
-    togglePlay: () => Promise<void>;
+    togglePlay: ({ sendToCloud }: { sendToCloud?: false }) => Promise<void>;
     setVolume: (volume: number) => void;
     setProgress: (progress: number) => void;
     setDuration: (duration: number) => void;
@@ -78,9 +79,30 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
         }
     },
 
-    togglePlay: async () => {
-        const { audio, isPlaying, currentSong, volume } = get();
-        if (!audio || !currentSong) return;
+    togglePlay: async ({ sendToCloud = true }) => {
+        const { isPlaying, currentSong, volume, playSong } = get();
+
+        // i used let because if audio is null, we need to update it
+        // and then get it again from the state
+        let audio = get().audio;
+
+        if (!currentSong) return;
+
+        if (!audio?.src) {
+            const url = await playSongMutation({
+                input: {
+                    songId: currentSong.id,
+                    artistId: currentSong.artist.id,
+                    contextId: currentSong.id,
+                    contextType: "SONG"
+                }
+            });
+            playSong(currentSong, url, currentSong.id, "SONG", currentSong.id, []);
+            audio = get().audio;
+        }
+
+        if (!audio?.src) return;
+
 
         const fadeDuration = 200; // 0.2 seconds
         const steps = 10;
@@ -95,14 +117,18 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
             }
             audio.pause();
             set({ isPlaying: false });
-            debouncedUpdateIsPlaying(false);
+            if (sendToCloud) {
+                debouncedUpdateIsPlaying(false);
+            }
             // Restore volume for next time
             audio.volume = volume;
         } else {
             // Fade in
             audio.volume = 0;
             set({ isPlaying: true });
-            debouncedUpdateIsPlaying(true);
+            if (sendToCloud) {
+                debouncedUpdateIsPlaying(true);
+            }
             audio.play().catch(console.error);
             for (let i = 1; i <= steps; i++) {
                 await new Promise((resolve) => setTimeout(resolve, stepTime));
