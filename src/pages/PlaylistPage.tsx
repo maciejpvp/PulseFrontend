@@ -15,6 +15,7 @@ import { formatTime } from "@/lib/formatTime";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { playSongMutation } from "@/graphql/mutations/useSongPlay";
+import { updatePositionMs } from "@/graphql/mutations/CloudStateMutations/updatePositionMs";
 
 export const PlaylistPage = () => {
     const { playlistId } = useParams<{ playlistId: string }>();
@@ -105,6 +106,7 @@ export const PlaylistPage = () => {
                 }
             });
             playSong(song, url, playlist.id, "PLAYLIST", playlist.name, songs);
+            updatePositionMs(0);
         } catch (error) {
             console.error("Failed to play song:", error);
         }

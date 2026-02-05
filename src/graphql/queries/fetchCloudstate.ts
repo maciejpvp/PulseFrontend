@@ -10,6 +10,7 @@ query GetCloudState {
     trackArtistId
     isPlaying
     positionMs
+    positionUpdatedAt
     repeatMode
     shuffleMode
     volume

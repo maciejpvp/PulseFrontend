@@ -3,6 +3,9 @@ import type { Song, MutationSongPlayArgs, ContextType } from "../graphql/types";
 import { debouncedUpdateVolume } from "@/graphql/mutations/CloudStateMutations/updateVolume";
 import { debouncedUpdateIsPlaying } from "@/graphql/mutations/CloudStateMutations/updateIsPlaying";
 import { playSongMutation } from "@/graphql/mutations/useSongPlay";
+import { useCloudStateStore } from "./cloudstate.store";
+import { getDevicePingInput } from "@/lib/getDevicePingInput";
+import { updatePositionMs } from "@/graphql/mutations/CloudStateMutations/updatePositionMs";
 
 type PlayerStore = {
     currentSong: Song | null;
@@ -25,7 +28,7 @@ type PlayerStore = {
     contextName: string | null;
 
     setCurrentSong: (song: Song | null) => void;
-    togglePlay: ({ sendToCloud }: { sendToCloud?: false }) => Promise<void>;
+    togglePlay: (options?: { sendToCloud?: false }) => Promise<void>;
     setVolume: (volume: number) => void;
     setProgress: (progress: number) => void;
     setDuration: (duration: number) => void;
@@ -59,28 +62,81 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     repeatMode: "none",
     originalQueue: [],
 
-    setCurrentSong: (song) => {
+    setCurrentSong: async (song) => {
         const { audio1, audio2, activeAudioIndex } = get();
+        // Reset progress immediately so new song starts at 0, unless externally updated during async operations
+        set({ progress: 0 });
+
         const activeAudio = activeAudioIndex === 0 ? audio1 : audio2;
         const inactiveAudio = activeAudioIndex === 0 ? audio2 : audio1;
 
-        if (activeAudio && song) {
-            set({ currentSong: song, audio: activeAudio });
-        } else {
+        // 1. If no song is provided, clear everything and stop playback
+        if (!song) {
+            [activeAudio, inactiveAudio].forEach(audio => {
+                if (audio) {
+                    audio.pause();
+                    audio.src = "";
+                }
+            });
             set({ currentSong: null, isPlaying: false, audio: null });
+            return;
+        }
+
+        try {
+            // 2. Stop current playback immediately for instant feedback
             if (activeAudio) {
                 activeAudio.pause();
-                activeAudio.src = "";
             }
-            if (inactiveAudio) {
-                inactiveAudio.pause();
-                inactiveAudio.src = "";
+
+            // 3. Fetch the audio URL from the mutation
+            const url = await playSongMutation({
+                input: {
+                    songId: song.id,
+                    artistId: song.artist.id,
+                    contextId: song.id,
+                    contextType: "SONG"
+                }
+            });
+
+            if (url && activeAudio) {
+                // 4. Force the new source and play
+                activeAudio.src = url;
+                activeAudio.load();
+
+                // Apply any progress that might have been set while we were awaiting the mutation
+                const { progress } = get();
+                if (progress > 0) {
+                    activeAudio.currentTime = progress;
+                }
+
+                // Update the global state immediately so PlayerBar appears
+                set({
+                    currentSong: song,
+                    audio: activeAudio,
+                    isPlaying: false
+                });
+
+                // Play returns a promise; we await it to handle potential autoplay blocks
+                try {
+                    await activeAudio.play();
+                    set({ isPlaying: true });
+                } catch (e) {
+                    console.warn("Playback failed (likely due to autoplay policy):", e);
+                    // Keep isPlaying as false, but component remains visible
+                }
             }
+        } catch (error) {
+            console.error("Error setting new song:", error);
+            // Even on error, we might want to keep the song set if possible, 
+            // but the outer try-catch is mostly for the mutation which we already awaited.
+            set({ isPlaying: false });
         }
     },
 
-    togglePlay: async ({ sendToCloud = true }) => {
-        const { isPlaying, currentSong, volume, playSong } = get();
+    togglePlay: async (options) => {
+        const { isPlaying, currentSong, volume, playSong, progress } = get();
+
+        const sendToCloud = options?.sendToCloud ?? true;
 
         // i used let because if audio is null, we need to update it
         // and then get it again from the state
@@ -103,6 +159,14 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
         if (!audio?.src) return;
 
+        // Send position to cloud
+        console.log("Progress:", progress);
+        updatePositionMs(progress);
+
+        const { primeDeviceId } = useCloudStateStore.getState();
+        const { deviceId: localDeviceId } = getDevicePingInput();
+        const shouldPlay = primeDeviceId === localDeviceId;
+
 
         const fadeDuration = 200; // 0.2 seconds
         const steps = 10;
@@ -110,18 +174,21 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
         if (isPlaying) {
             // Fade out
-            const startVolume = audio.volume;
-            for (let i = 1; i <= steps; i++) {
-                await new Promise((resolve) => setTimeout(resolve, stepTime));
-                audio.volume = Math.max(0, startVolume - (startVolume * (i / steps)));
+            // Only fade out if we are actually playing sound
+            if (audio.volume > 0) {
+                const startVolume = audio.volume;
+                for (let i = 1; i <= steps; i++) {
+                    await new Promise((resolve) => setTimeout(resolve, stepTime));
+                    audio.volume = Math.max(0, startVolume - (startVolume * (i / steps)));
+                }
             }
             audio.pause();
             set({ isPlaying: false });
             if (sendToCloud) {
                 debouncedUpdateIsPlaying(false);
             }
-            // Restore volume for next time
-            audio.volume = volume;
+            // Restore volume for next time based on prime status
+            audio.volume = shouldPlay ? volume : 0;
         } else {
             // Fade in
             audio.volume = 0;
@@ -130,18 +197,32 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
                 debouncedUpdateIsPlaying(true);
             }
             audio.play().catch(console.error);
-            for (let i = 1; i <= steps; i++) {
-                await new Promise((resolve) => setTimeout(resolve, stepTime));
-                audio.volume = Math.min(volume, volume * (i / steps));
+            if (shouldPlay) {
+                audio.volume = volume;
             }
-            audio.volume = volume;
+
+            // Only fade in if we should play sound
+            if (shouldPlay) {
+                for (let i = 1; i <= steps; i++) {
+                    await new Promise((resolve) => setTimeout(resolve, stepTime));
+                    audio.volume = Math.min(volume, volume * (i / steps));
+                }
+                audio.volume = volume;
+            } else {
+                audio.volume = 0;
+            }
         }
     },
 
     setVolume: (volume) => {
         const { audio1, audio2 } = get();
-        if (audio1) audio1.volume = volume;
-        if (audio2) audio2.volume = volume;
+        const { primeDeviceId } = useCloudStateStore.getState();
+        const { deviceId: localDeviceId } = getDevicePingInput();
+        const shouldPlay = primeDeviceId === localDeviceId;
+        const effectiveVolume = shouldPlay ? volume : 0;
+
+        if (audio1) audio1.volume = effectiveVolume;
+        if (audio2) audio2.volume = effectiveVolume;
         set({ volume });
 
         // Debounce cloud state update
@@ -150,7 +231,10 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
     setProgress: (progress) => {
         const { audio } = get();
+        console.log("progress", progress);
+        console.log("audio", audio);
         if (audio) {
+            console.log("progress", progress);
             audio.currentTime = progress;
         }
         set({ progress });
@@ -236,10 +320,16 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
         set({ isCrossfading: true });
 
+        const { primeDeviceId } = useCloudStateStore.getState();
+        const { deviceId: localDeviceId } = getDevicePingInput();
+        const shouldPlay = primeDeviceId === localDeviceId;
+
         // Setup inactive audio
         inactiveAudio.src = nextSongData.url;
         inactiveAudio.volume = 0;
-        inactiveAudio.play().catch(console.error);
+        if (shouldPlay) {
+            inactiveAudio.play().catch(console.error);
+        }
 
         // Update UI immediately
         set({
@@ -250,15 +340,24 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
         });
 
         // Crossfade
+
         const duration = 5000; // 5 seconds
         const steps = 50;
         const stepTime = duration / steps;
         const volumeStep = volume / steps;
 
-        for (let i = 1; i <= steps; i++) {
-            await new Promise((resolve) => setTimeout(resolve, stepTime));
-            inactiveAudio.volume = Math.min(volume, i * volumeStep);
-            activeAudio.volume = Math.max(0, volume - i * volumeStep);
+        if (shouldPlay) {
+            for (let i = 1; i <= steps; i++) {
+                await new Promise((resolve) => setTimeout(resolve, stepTime));
+                inactiveAudio.volume = Math.min(volume, i * volumeStep);
+                activeAudio.volume = Math.max(0, volume - i * volumeStep);
+            }
+        } else {
+            // Even if we shouldn't play, we wait the duration to sync state
+            // But volumes should stay 0
+            inactiveAudio.volume = 0;
+            activeAudio.volume = 0;
+            await new Promise((resolve) => setTimeout(resolve, duration));
         }
 
         activeAudio.pause();
@@ -282,7 +381,13 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
             const { audio } = get();
             if (audio) {
                 audio.currentTime = 0;
-                audio.play().catch(console.error);
+                const { primeDeviceId } = useCloudStateStore.getState();
+                const { deviceId: localDeviceId } = getDevicePingInput();
+                const shouldPlay = primeDeviceId === localDeviceId;
+
+                if (shouldPlay) {
+                    audio.play().catch(console.error);
+                }
                 return;
             }
         }
@@ -351,7 +456,12 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
         // Reset both
         activeAudio.pause();
         activeAudio.src = url;
-        activeAudio.volume = volume;
+
+        const { primeDeviceId } = useCloudStateStore.getState();
+        const { deviceId: localDeviceId } = getDevicePingInput();
+        const shouldPlay = primeDeviceId === localDeviceId;
+
+        activeAudio.volume = shouldPlay ? volume : 0;
 
         inactiveAudio.pause();
         inactiveAudio.src = "";
@@ -368,7 +478,9 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
             nextSongData: null
         });
 
-        activeAudio.play().catch(console.error);
+        if (shouldPlay) {
+            activeAudio.play().catch(console.error);
+        }
     },
 }));
 
@@ -391,3 +503,14 @@ if (typeof Audio !== "undefined") {
         });
     });
 }
+
+// Subscribe to primeDeviceId changes to update volume immediately
+useCloudStateStore.subscribe((state) => {
+    const { deviceId } = getDevicePingInput();
+    const shouldPlay = state.primeDeviceId === deviceId;
+    const { audio1, audio2, volume } = usePlayerStore.getState();
+    const effectiveVolume = shouldPlay ? volume : 0;
+
+    if (audio1) audio1.volume = effectiveVolume;
+    if (audio2) audio2.volume = effectiveVolume;
+});

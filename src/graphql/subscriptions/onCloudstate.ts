@@ -11,6 +11,7 @@ subscription OnCloudStateUpdate {
     trackArtistId
     isPlaying
     positionMs
+    positionUpdatedAt
     repeatMode
     shuffleMode
     volume

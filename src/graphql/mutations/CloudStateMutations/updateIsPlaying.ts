@@ -29,5 +29,5 @@ export const updateIsPlaying = async (isPlaying: boolean) => {
 
 export const debouncedUpdateIsPlaying = debounce((isPlaying: boolean) => {
     updateIsPlaying(isPlaying);
-}, 200);
+}, 50);
 

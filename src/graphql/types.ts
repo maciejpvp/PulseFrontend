@@ -125,7 +125,8 @@ export type BookmarkResponse = {
 export type CloudState = {
   __typename?: 'CloudState';
   isPlaying?: Maybe<Scalars['Boolean']['output']>;
-  positionMs?: Maybe<Scalars['Int']['output']>;
+  positionMs?: Maybe<Scalars['String']['output']>;
+  positionUpdatedAt?: Maybe<Scalars['String']['output']>;
   primeDeviceId?: Maybe<Scalars['String']['output']>;
   repeatMode?: Maybe<Scalars['String']['output']>;
   shuffleMode?: Maybe<Scalars['String']['output']>;
@@ -136,7 +137,8 @@ export type CloudState = {
 
 export type CloudStateAttributes = {
   isPlaying?: InputMaybe<Scalars['Boolean']['input']>;
-  positionMs?: InputMaybe<Scalars['Int']['input']>;
+  positionMs?: InputMaybe<Scalars['String']['input']>;
+  positionUpdatedAt?: InputMaybe<Scalars['String']['input']>;
   primeDeviceId?: InputMaybe<Scalars['String']['input']>;
   repeatMode?: InputMaybe<Scalars['String']['input']>;
   shuffleMode?: InputMaybe<Scalars['String']['input']>;
@@ -489,6 +491,14 @@ export type UpdateIsPlayingMutationVariables = Exact<{
 
 export type UpdateIsPlayingMutation = { __typename?: 'Mutation', cloudStateUpdate: boolean };
 
+export type UpdatePositionMutationVariables = Exact<{
+  position?: InputMaybe<Scalars['String']['input']>;
+  positionUpdatedAt?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type UpdatePositionMutation = { __typename?: 'Mutation', cloudStateUpdate: boolean };
+
 export type UpdateVolumeMutationVariables = Exact<{
   volume?: InputMaybe<Scalars['Int']['input']>;
 }>;
@@ -563,7 +573,7 @@ export type SongPlayMutation = { __typename?: 'Mutation', songPlay: string };
 export type GetCloudStateQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetCloudStateQuery = { __typename?: 'Query', cloudState: { __typename?: 'CloudState', primeDeviceId?: string | null, trackId?: string | null, isPlaying?: boolean | null, positionMs?: number | null, repeatMode?: string | null, shuffleMode?: string | null, volume?: number | null } };
+export type GetCloudStateQuery = { __typename?: 'Query', cloudState: { __typename?: 'CloudState', primeDeviceId?: string | null, trackId?: string | null, trackArtistId?: string | null, isPlaying?: boolean | null, positionMs?: string | null, repeatMode?: string | null, shuffleMode?: string | null, volume?: number | null } };
 
 export type GetAlbumQueryVariables = Exact<{
   input: AlbumQueryInput;
@@ -589,13 +599,13 @@ export type GetBookmarksQuery = { __typename?: 'Query', bookmarks: { __typename?
         | { __typename: 'SongPreview' }
        }> | null } };
 
-export type GetSongQueryVariables = Exact<{
+export type GetSongItemQueryVariables = Exact<{
   songId: Scalars['ID']['input'];
   artistId: Scalars['ID']['input'];
 }>;
 
 
-export type GetSongQuery = { __typename?: 'Query', song: { __typename?: 'Song', id: string, title: string, duration?: number | null, artist: { __typename?: 'ArtistPreview', id: string, name: string } } };
+export type GetSongItemQuery = { __typename?: 'Query', song: { __typename?: 'Song', id: string, title: string, duration?: number | null, artist: { __typename?: 'ArtistPreview', id: string, name: string } } };
 
 export type GetPlaylistQueryVariables = Exact<{
   playlistId: Scalars['ID']['input'];
@@ -626,10 +636,18 @@ export type SearchQuery = { __typename?: 'Query', search?: { __typename?: 'Searc
       | { __typename: 'SongPreview', id: string, title: string, artistId: string }
     > } | null };
 
+export type GetSongQueryVariables = Exact<{
+  songId: Scalars['ID']['input'];
+  artistId: Scalars['ID']['input'];
+}>;
+
+
+export type GetSongQuery = { __typename?: 'Query', song: { __typename?: 'Song', id: string, title: string, duration?: number | null, imageUrl?: string | null, artist: { __typename?: 'ArtistPreview', id: string, name: string, imageUrl?: string | null } } };
+
 export type OnCloudStateUpdateSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type OnCloudStateUpdateSubscription = { __typename?: 'Subscription', onCloudState?: { __typename?: 'CloudState', primeDeviceId?: string | null, trackId?: string | null, isPlaying?: boolean | null, positionMs?: number | null, repeatMode?: string | null, shuffleMode?: string | null, volume?: number | null } | null };
+export type OnCloudStateUpdateSubscription = { __typename?: 'Subscription', onCloudState?: { __typename?: 'CloudState', primeDeviceId?: string | null, trackId?: string | null, trackArtistId?: string | null, isPlaying?: boolean | null, positionMs?: string | null, positionUpdatedAt?: string | null, repeatMode?: string | null, shuffleMode?: string | null, volume?: number | null } | null };
 
 export type OnDevicePingSubscriptionVariables = Exact<{ [key: string]: never; }>;
 

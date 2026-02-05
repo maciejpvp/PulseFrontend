@@ -27,6 +27,7 @@ import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { changePrimeDevice } from "@/graphql/mutations/CloudStateMutations/changePrimeDevice";
 import { playSongMutation } from "@/graphql/mutations/useSongPlay";
+import { updatePositionMs } from "@/graphql/mutations/CloudStateMutations/updatePositionMs";
 
 export const PlayerBar = () => {
     const {
@@ -65,6 +66,7 @@ export const PlayerBar = () => {
         const handleEnded = () => {
             if (!isCrossfading) {
                 nextSong(playSongMutation);
+                updatePositionMs(0);
             }
         };
 
@@ -158,6 +160,7 @@ export const PlayerBar = () => {
                     const rect = e.currentTarget.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const percentage = x / rect.width;
+                    updatePositionMs(percentage * duration);
                     setProgress(percentage * duration);
                 }}
             >
@@ -219,7 +222,7 @@ export const PlayerBar = () => {
                         <SkipBack className="w-6 h-6 fill-current" />
                     </button>
                     <button
-                        onClick={togglePlay}
+                        onClick={() => togglePlay()}
                         className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-white rounded-full hover:scale-105 transition-transform shrink-0"
                     >
                         {isPlaying ? (
@@ -257,7 +260,7 @@ export const PlayerBar = () => {
             </div>
 
             {/* Right Section: Devices & Volume */}
-            <div className="flex items-center justify-end gap-1 md:gap-3 md:w-[30%] min-w-0">
+            < div className="flex items-center justify-end gap-1 md:gap-3 md:w-[30%] min-w-0" >
                 <Popover>
                     <PopoverTrigger asChild>
                         <button className="text-stone-400 hover:text-white transition-colors p-2 shrink-0">
@@ -285,7 +288,7 @@ export const PlayerBar = () => {
                 </Popover>
 
                 {/* Volume - Desktop Only */}
-                <div
+                < div
                     className="hidden md:flex items-center gap-3"
                     onWheel={(e) => {
                         e.preventDefault();
@@ -306,9 +309,9 @@ export const PlayerBar = () => {
                         onChange={handleVolumeChange}
                         className="w-24 h-1 bg-stone-600 rounded-lg appearance-none cursor-pointer accent-white hover:accent-green-500"
                     />
-                </div>
-            </div>
-        </div>,
+                </div >
+            </div >
+        </div >,
         document.getElementById("player-root")!
     );
 };

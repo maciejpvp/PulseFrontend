@@ -16,6 +16,7 @@ import { usePlaylist } from "@/graphql/mutations/usePlaylist";
 import { AlbumSkeleton } from "@/components/skeletons/AlbumSkeleton";
 import { toast } from "sonner";
 import { playSongMutation } from "@/graphql/mutations/useSongPlay";
+import { updatePositionMs } from "@/graphql/mutations/CloudStateMutations/updatePositionMs";
 
 
 export const AlbumPage = () => {
@@ -75,6 +76,7 @@ export const AlbumPage = () => {
                     contextType: "ALBUM"
                 }
             });
+            updatePositionMs(0);
             playSong(song, url, album.id, "ALBUM", album.name, songs);
         } catch (error) {
             console.error("Failed to play song:", error);

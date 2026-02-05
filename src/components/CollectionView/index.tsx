@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { type VariantProps } from "class-variance-authority";
 import { containerVariants, imageContainerVariants, iconVariants, textVariants } from "./variants";
 import { playSongMutation } from "@/graphql/mutations/useSongPlay";
+import { updatePositionMs } from "@/graphql/mutations/CloudStateMutations/updatePositionMs";
 
 type BaseProps = VariantProps<typeof containerVariants>;
 
@@ -89,6 +90,7 @@ export const CollectionView = (props: Props) => {
 
             const url = await playSongMutation(input);
             playSong(fullSong, url, artistId, "ARTIST", fullSong.artist.name, [])
+            updatePositionMs(0);
         }
     }
 
