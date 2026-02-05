@@ -238,7 +238,7 @@ export const PlayerBar = () => {
                         <SkipForward className="w-6 h-6 fill-current" />
                     </button>
                     <button
-                        onClick={toggleRepeat}
+                        onClick={() => toggleRepeat()}
                         className={cn(
                             "transition-colors hidden md:block",
                             repeatMode !== "none" ? "text-green-500 hover:text-green-400" : "text-stone-400 hover:text-white"
@@ -277,7 +277,7 @@ export const PlayerBar = () => {
                                         primeDeviceId === device.deviceId ? "text-green-500 bg-green-500/10" : "text-stone-300 hover:bg-white/5"
                                     )} onClick={() => changePrimeDevice(device.deviceId)}>
                                         {getDeviceIcon(device.type)}
-                                        <span className="text-xs font-medium truncate">{device.name}</span>
+                                        <span className="text-xs font-medium truncate">{device.name} {device.deviceId === localStorage.getItem("app_device_id") ? "(You)" : ""}</span>
                                     </button>
                                 ))
                             ) : (

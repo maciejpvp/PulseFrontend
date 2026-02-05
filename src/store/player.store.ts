@@ -6,6 +6,8 @@ import { playSongMutation } from "@/graphql/mutations/useSongPlay";
 import { useCloudStateStore } from "./cloudstate.store";
 import { getDevicePingInput } from "@/lib/getDevicePingInput";
 import { updatePositionMs } from "@/graphql/mutations/CloudStateMutations/updatePositionMs";
+import { debouncedUpdateRepeatMode } from "@/graphql/mutations/CloudStateMutations/updateRepeatMode";
+import { debouncedUpdateShuffleMode } from "@/graphql/mutations/CloudStateMutations/updateShuffleMode";
 
 type PlayerStore = {
     currentSong: Song | null;
@@ -34,7 +36,7 @@ type PlayerStore = {
     setDuration: (duration: number) => void;
     setQueue: (queue: Song[]) => void;
     toggleShuffle: () => void;
-    toggleRepeat: () => void;
+    toggleRepeat: (mode?: "none" | "all" | "one", sendToCloud?: boolean) => void;
     prepareNextSong: (playMutation: (args: MutationSongPlayArgs) => Promise<string>) => Promise<void>;
     startCrossfade: (playMutation: (args: MutationSongPlayArgs) => Promise<string>) => Promise<void>;
     nextSong: (playMutation: (args: MutationSongPlayArgs) => Promise<string>, forceNext?: boolean) => Promise<void>;
@@ -249,6 +251,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
         if (isShuffled) {
             // Restore original queue
             set({ isShuffled: false, queue: originalQueue });
+            debouncedUpdateShuffleMode(false);
         } else {
             // Shuffle queue, but keep current song at the beginning if playing
             let newQueue = [...queue];
@@ -260,14 +263,25 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
                 newQueue = [...queue].sort(() => Math.random() - 0.5);
             }
             set({ isShuffled: true, queue: newQueue });
+            debouncedUpdateShuffleMode(true);
         }
     },
 
-    toggleRepeat: () => {
+    toggleRepeat: (mode, sendToCloud = true) => {
+        console.log("TOGGLE REPEAT");
+        if (mode === "none" || mode === "all" || mode === "one") {
+            console.log("MODE", mode);
+            set({ repeatMode: mode });
+            if (sendToCloud) debouncedUpdateRepeatMode(mode);
+            return;
+        }
+
         const { repeatMode } = get();
         const modes: ("none" | "all" | "one")[] = ["none", "all", "one"];
         const currentIndex = modes.indexOf(repeatMode);
         const nextMode = modes[(currentIndex + 1) % modes.length];
+        console.log("NEXT MODE", nextMode);
+        if (sendToCloud) debouncedUpdateRepeatMode(nextMode);
         set({ repeatMode: nextMode });
     },
 
