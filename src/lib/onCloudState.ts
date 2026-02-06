@@ -32,12 +32,13 @@ const handleTrackChange = async (data: CloudState, playerStore: ReturnType<typeo
 const handleIsPlaying = (data: CloudState, playerStore: ReturnType<typeof usePlayerStore.getState>) => {
     if (data.isPlaying !== null) {
         if (data.isPlaying !== playerStore.isPlaying) {
-            playerStore.togglePlay({ sendToCloud: false });
+            playerStore.togglePlay({ sendToCloud: false, mode: data.isPlaying ? "ON" : "OFF" });
         }
     }
 };
 
 const handlePosition = (data: CloudState, playerStore: ReturnType<typeof usePlayerStore.getState>) => {
+    console.log("POSITION", data.positionMs, data.positionUpdatedAt);
     if (data.positionMs != null && data.positionUpdatedAt) {
         if (data.isPlaying === false) {
             playerStore.setProgress(Number(data.positionMs));

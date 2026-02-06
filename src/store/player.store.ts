@@ -1,15 +1,16 @@
 import { create } from "zustand";
 import type { Song, MutationSongPlayArgs, ContextType } from "../graphql/types";
 import { debouncedUpdateVolume } from "@/graphql/mutations/CloudStateMutations/updateVolume";
-import { debouncedUpdateIsPlaying } from "@/graphql/mutations/CloudStateMutations/updateIsPlaying";
+
 import { playSongMutation } from "@/graphql/mutations/useSongPlay";
 import { useCloudStateStore } from "./cloudstate.store";
 import { getDevicePingInput } from "@/lib/getDevicePingInput";
-import { updatePositionMs } from "@/graphql/mutations/CloudStateMutations/updatePositionMs";
+
 import { debouncedUpdateRepeatMode } from "@/graphql/mutations/CloudStateMutations/updateRepeatMode";
 import { debouncedUpdateShuffleMode } from "@/graphql/mutations/CloudStateMutations/updateShuffleMode";
+import { togglePlayAction } from "./player.actions";
 
-type PlayerStore = {
+export type PlayerStore = {
     currentSong: Song | null;
     isPlaying: boolean;
     volume: number;
@@ -30,7 +31,7 @@ type PlayerStore = {
     contextName: string | null;
 
     setCurrentSong: (song: Song | null) => void;
-    togglePlay: (options?: { sendToCloud?: false }) => Promise<void>;
+    togglePlay: (options?: { sendToCloud?: false, mode?: "ON" | "OFF" }) => Promise<void>;
     setVolume: (volume: number) => void;
     setProgress: (progress: number) => void;
     setDuration: (duration: number) => void;
@@ -136,84 +137,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     },
 
     togglePlay: async (options) => {
-        const { isPlaying, currentSong, volume, playSong, progress } = get();
-
-        const sendToCloud = options?.sendToCloud ?? true;
-
-        // i used let because if audio is null, we need to update it
-        // and then get it again from the state
-        let audio = get().audio;
-
-        if (!currentSong) return;
-
-        if (!audio?.src) {
-            const url = await playSongMutation({
-                input: {
-                    songId: currentSong.id,
-                    artistId: currentSong.artist.id,
-                    contextId: currentSong.id,
-                    contextType: "SONG"
-                }
-            });
-            playSong(currentSong, url, currentSong.id, "SONG", currentSong.id, []);
-            audio = get().audio;
-        }
-
-        if (!audio?.src) return;
-
-        // Send position to cloud
-        console.log("Progress:", progress);
-        updatePositionMs(progress);
-
-        const { primeDeviceId } = useCloudStateStore.getState();
-        const { deviceId: localDeviceId } = getDevicePingInput();
-        const shouldPlay = primeDeviceId === localDeviceId;
-
-
-        const fadeDuration = 200; // 0.2 seconds
-        const steps = 10;
-        const stepTime = fadeDuration / steps;
-
-        if (isPlaying) {
-            // Fade out
-            // Only fade out if we are actually playing sound
-            if (audio.volume > 0) {
-                const startVolume = audio.volume;
-                for (let i = 1; i <= steps; i++) {
-                    await new Promise((resolve) => setTimeout(resolve, stepTime));
-                    audio.volume = Math.max(0, startVolume - (startVolume * (i / steps)));
-                }
-            }
-            audio.pause();
-            set({ isPlaying: false });
-            if (sendToCloud) {
-                debouncedUpdateIsPlaying(false);
-            }
-            // Restore volume for next time based on prime status
-            audio.volume = shouldPlay ? volume : 0;
-        } else {
-            // Fade in
-            audio.volume = 0;
-            set({ isPlaying: true });
-            if (sendToCloud) {
-                debouncedUpdateIsPlaying(true);
-            }
-            audio.play().catch(console.error);
-            if (shouldPlay) {
-                audio.volume = volume;
-            }
-
-            // Only fade in if we should play sound
-            if (shouldPlay) {
-                for (let i = 1; i <= steps; i++) {
-                    await new Promise((resolve) => setTimeout(resolve, stepTime));
-                    audio.volume = Math.min(volume, volume * (i / steps));
-                }
-                audio.volume = volume;
-            } else {
-                audio.volume = 0;
-            }
-        }
+        await togglePlayAction(get, set, options);
     },
 
     setVolume: (volume) => {

@@ -75,6 +75,9 @@ export const PlayerBar = () => {
     }, [nextSong, isCrossfading]);
 
     useEffect(() => {
+        // Only for Prime Device
+        if (primeDeviceId !== localStorage.getItem("app_device_id")) return;
+
         if (isCrossfading || !duration || !currentSong) return;
 
         const remaining = duration - progress;
@@ -96,6 +99,7 @@ export const PlayerBar = () => {
         isCrossfading,
         prepareNextSong,
         startCrossfade,
+        primeDeviceId
     ]);
 
     useEffect(() => {

@@ -3,10 +3,12 @@ import { generateClient } from "aws-amplify/api";
 import gql from "graphql-tag";
 
 const UPDATE_IS_PLAYING = gql`
-            mutation UpdateIsPlaying($isPlaying: Boolean) {
+            mutation UpdateIsPlaying($isPlaying: Boolean, $position: String, $now: String) {
                 cloudStateUpdate(input: {
                     attributes: {
-                        isPlaying: $isPlaying
+                        isPlaying: $isPlaying,
+                        positionMs: $position,
+                        positionUpdatedAt: $now
                     }
                 })
             }
@@ -14,12 +16,16 @@ const UPDATE_IS_PLAYING = gql`
 
 const client = generateClient();
 
-export const updateIsPlaying = async (isPlaying: boolean) => {
+export const updateIsPlaying = async (isPlaying: boolean, position?: number) => {
+    const now = Date.now();
+
     try {
         await client.graphql({
             query: UPDATE_IS_PLAYING,
             variables: {
-                isPlaying
+                isPlaying,
+                position: `${position}`,
+                now: `${now}`
             }
         });
     } catch (error) {
@@ -27,7 +33,7 @@ export const updateIsPlaying = async (isPlaying: boolean) => {
     }
 }
 
-export const debouncedUpdateIsPlaying = debounce((isPlaying: boolean) => {
-    updateIsPlaying(isPlaying);
+export const debouncedUpdateIsPlaying = debounce((isPlaying: boolean, position?: number) => {
+    updateIsPlaying(isPlaying, position);
 }, 50);
 

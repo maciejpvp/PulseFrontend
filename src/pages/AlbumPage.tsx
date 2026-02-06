@@ -67,6 +67,7 @@ export const AlbumPage = () => {
         try {
             // Instant ui response for user seeing effect immediately
             playSong(song, "", album.id, "ALBUM", album.name, songs);
+            updatePositionMs(0);
 
             const url = await playSongMutation({
                 input: {
@@ -76,7 +77,6 @@ export const AlbumPage = () => {
                     contextType: "ALBUM"
                 }
             });
-            updatePositionMs(0);
             playSong(song, url, album.id, "ALBUM", album.name, songs);
         } catch (error) {
             console.error("Failed to play song:", error);
