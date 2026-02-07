@@ -14,6 +14,10 @@ Pulse is a music streaming web application for managing and playing your persona
 ![Album View](Showcase/image2.png)
 ![Playlist View](Showcase/image3.png)
 
+## PulseConnect
+
+PulseConnect synchronizes cloud state to sync data across devices.
+
 ## Infrastructure
 
 The backend is managed with AWS CDK and is hosted in a separate [repository](https://github.com/maciejpvp/Pulse).
