@@ -29,6 +29,8 @@ import { changePrimeDevice } from "@/graphql/mutations/CloudStateMutations/chang
 import { playSongMutation } from "@/graphql/mutations/useSongPlay";
 import { updatePositionMs } from "@/graphql/mutations/CloudStateMutations/updatePositionMs";
 
+let lastProgressValue: number | null = null;
+
 export const PlayerBar = () => {
     const {
         currentSong,
@@ -101,6 +103,33 @@ export const PlayerBar = () => {
         startCrossfade,
         primeDeviceId
     ]);
+
+    useEffect(() => {
+        const intervalId = setInterval(async () => {
+            if (lastProgressValue === progress && isPlaying) {
+                console.log("IT GOT STUCK", progress);
+                // Workaround for a desync between cloudstate and playerstore
+                usePlayerStore.getState().togglePlay({ sendToCloud: false });
+                usePlayerStore.getState().setProgress(progress + 1);
+                setTimeout(() => {
+                    usePlayerStore.getState().togglePlay({ sendToCloud: false });
+                }, 0);
+            }
+            lastProgressValue = progress;
+        }, 1000);
+
+        return () => clearInterval(intervalId);
+    }, [progress, isPlaying]);
+
+    useEffect(() => {
+        if (primeDeviceId === localStorage.getItem("app_device_id")) {
+            const audio = usePlayerStore.getState().audio;
+            if (audio) audio.pause();
+        } else {
+            const audio = usePlayerStore.getState().audio;
+            if (audio) audio.play();
+        }
+    }, [primeDeviceId]);
 
     useEffect(() => {
         let animationFrameId: number;

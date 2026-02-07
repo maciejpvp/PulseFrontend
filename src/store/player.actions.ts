@@ -42,7 +42,7 @@ const handleStop = async (
     const { volume, progress } = get();
 
     // Fade out if playing sound
-    if (audio.volume > 0) {
+    if (shouldPlay && audio.volume > 0) {
         await fadeAudio(audio, audio.volume, 0);
     }
 
@@ -74,10 +74,9 @@ const handleStart = async (
         debouncedUpdateIsPlaying(true, progress);
     }
 
-    audio.play().catch(console.error);
-
     // Fade in if we should play sound
     if (shouldPlay) {
+        audio.play().catch(console.error);
         await fadeAudio(audio, 0, volume);
     } else {
         audio.volume = 0;

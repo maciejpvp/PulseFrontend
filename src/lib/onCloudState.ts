@@ -15,6 +15,10 @@ const handlePrimeDeviceId = (data: CloudState, cloudStateStore: ReturnType<typeo
     if (data.primeDeviceId) {
         if (data.primeDeviceId === cloudStateStore.primeDeviceId) return;
         cloudStateStore.setPrimeDeviceId(data.primeDeviceId);
+        usePlayerStore.getState().togglePlay({ sendToCloud: false });
+        setTimeout(() => {
+            usePlayerStore.getState().togglePlay({ sendToCloud: false });
+        }, 0);
     }
 };
 
@@ -37,7 +41,7 @@ const handleIsPlaying = (data: CloudState, playerStore: ReturnType<typeof usePla
     }
 };
 
-const handlePosition = (data: CloudState, playerStore: ReturnType<typeof usePlayerStore.getState>) => {
+export const handlePosition = (data: CloudState, playerStore: ReturnType<typeof usePlayerStore.getState>) => {
     console.log("POSITION", data.positionMs, data.positionUpdatedAt);
     if (data.positionMs != null && data.positionUpdatedAt) {
         if (data.isPlaying === false) {
