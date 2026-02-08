@@ -16,7 +16,8 @@ import {
     Monitor,
     Smartphone,
     HelpCircle,
-    Laptop
+    Laptop,
+    Mic2
 } from "lucide-react";
 import {
     Popover,
@@ -28,6 +29,9 @@ import { cn } from "@/lib/utils";
 import { changePrimeDevice } from "@/graphql/mutations/CloudStateMutations/changePrimeDevice";
 import { playSongMutation } from "@/graphql/mutations/useSongPlay";
 import { updatePositionMs } from "@/graphql/mutations/CloudStateMutations/updatePositionMs";
+import { fetchLyrics } from "@/lib/getLyrics/fetchLyrics";
+import { LyricsView } from "../LyricsView";
+import { useState } from "react";
 
 let lastProgressValue: number | null = null;
 
@@ -56,6 +60,9 @@ export const PlayerBar = () => {
     const progressBarRef = useRef<HTMLDivElement>(null);
     const knobRef = useRef<HTMLDivElement>(null);
     const primeDeviceId = useCloudStateStore(store => store.primeDeviceId);
+
+    const [isLyricsOpen, setIsLyricsOpen] = useState(false);
+    const [currentLyrics, setCurrentLyrics] = useState<string | null>(null);
 
     useEffect(() => {
         useCloudStateStore.getState().fetchDevices();
@@ -165,6 +172,25 @@ export const PlayerBar = () => {
 
     const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setVolume(Number(e.target.value));
+    };
+
+    const handleFetchLyrics = async () => {
+        if (!currentSong) return;
+        const query = `${currentSong.artist.name} ${currentSong.title}`;
+        console.log(`[Lyrics] Fetching for: ${query}...`);
+        try {
+            const lyrics = await fetchLyrics(query);
+            if (lyrics) {
+                console.log(`[Lyrics] Found:\n${lyrics}`);
+                setCurrentLyrics(lyrics);
+                setIsLyricsOpen(true);
+            } else {
+                console.log(`[Lyrics] No lyrics found for ${query}`);
+                // Optional: show a toast or message
+            }
+        } catch (error) {
+            console.error(`[Lyrics] Error fetching lyrics:`, error);
+        }
     };
 
     const getDeviceIcon = (type: string) => {
@@ -320,6 +346,14 @@ export const PlayerBar = () => {
                     </PopoverContent>
                 </Popover>
 
+                <button
+                    onClick={handleFetchLyrics}
+                    className="text-stone-400 hover:text-white transition-colors p-2 shrink-0"
+                    title="Fetch Lyrics"
+                >
+                    <Mic2 className="w-5 h-5 md:w-6 md:h-6" />
+                </button>
+
                 {/* Volume - Desktop Only */}
                 < div
                     className="hidden md:flex items-center gap-3"
@@ -344,6 +378,15 @@ export const PlayerBar = () => {
                     />
                 </div >
             </div >
+
+            <LyricsView
+                isOpen={isLyricsOpen}
+                onClose={() => setIsLyricsOpen(false)}
+                lyrics={currentLyrics || ""}
+                songTitle={currentSong.title}
+                artistName={currentSong.artist.name}
+                imageUrl={currentSong.imageUrl || null}
+            />
         </div >,
         document.getElementById("player-root")!
     );
